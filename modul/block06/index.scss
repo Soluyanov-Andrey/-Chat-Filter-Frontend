@@ -1,0 +1,28 @@
+.block06 {
+    padding-top: 10px;
+  }
+  
+  .block06 button {
+      /* Общие стили для всех кнопок */
+      background-color: #ADD8E6; /* Светло-голубой фон */
+      border: 1px solid #778899; /* Серая рамка */
+      color: #2F4F4F; /* Тёмно-серый текст */
+      padding: 8px 16px; /* Отступы внутри кнопки */
+      margin: 5px; /* Отступы между кнопками */
+      cursor: pointer; /* Курсор в виде руки при наведении */
+      border-radius: 4px; /* Скругленные углы */
+      font-size: 14px; /* Размер шрифта */
+      font-family: sans-serif; /* Шрифт */
+      transition: background-color 0.3s ease; /* Плавное изменение цвета фона при наведении */
+    }
+    
+    .block06 button:hover {
+      /* Стиль при наведении */
+      background-color: #87CEEB; /* Более насыщенный голубой фон */
+    }
+    
+    .block06 button:active {
+      /* Стиль при нажатии */
+      background-color: #4682B4; /* Ещё более тёмный голубой фон */
+      color: white; /* Белый текст при нажатии */
+    }

@@ -1,0 +1,63 @@
+.block05 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+  }
+  
+  .block05-input {
+    flex-grow: 1;
+    margin-right: 10px;
+  }
+  
+  .block05-input input[type="text"] { /* Выбираем именно текстовые поля */
+    font-size: 16px; /* Увеличиваем шрифт */
+    border: 2px solid #ccc; /* Делаем рамку больше и меняем цвет */
+    padding: 8px; /* Добавляем внутренний отступ, чтобы текст не прилипал к рамке */
+    border-radius: 5px; /* Закругляем углы рамки */
+    width: 100%; /* Чтобы input занимал всю доступную ширину внутри .block05-input */
+    box-sizing: border-box; /*  Важно, чтобы padding и border не увеличивали общую ширину input */
+  }
+  
+  #block05-btn {
+    padding: 10px 20px;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    cursor: pointer;
+  }
+  
+  /* Добавляем фокус для input - опционально */
+  .block05-input input[type="text"]:focus {
+    outline: none; /* Убираем стандартный outline при фокусе */
+    border-color: #007bff; /* Меняем цвет рамки при фокусе */
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Добавляем тень при фокусе */
+  }
+  
+  .block05 button {
+      /* Общие стили для всех кнопок */
+      background-color: #ADD8E6; /* Светло-голубой фон */
+      border: 1px solid #778899; /* Серая рамка */
+      color: #2F4F4F; /* Тёмно-серый текст */
+      padding: 8px 16px; /* Отступы внутри кнопки */
+      margin: 5px; /* Отступы между кнопками */
+      cursor: pointer; /* Курсор в виде руки при наведении */
+      border-radius: 4px; /* Скругленные углы */
+      font-size: 14px; /* Размер шрифта */
+      font-family: sans-serif; /* Шрифт */
+      transition: background-color 0.3s ease; /* Плавное изменение цвета фона при наведении */
+    }
+    
+    .block05 button:hover {
+      /* Стиль при наведении */
+      background-color: #87CEEB; /* Более насыщенный голубой фон */
+    }
+    
+    .block05 button:active {
+      /* Стиль при нажатии */
+      background-color: #4682B4; /* Ещё более тёмный голубой фон */
+      color: white; /* Белый текст при нажатии */
+    }
+
+.block05-input{
+  
+}

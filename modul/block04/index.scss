@@ -1,0 +1,23 @@
+ul {
+    list-style: none; /* Убираем стандартные маркеры списка */
+    padding: 0;
+  }
+  
+  li {
+    padding: 5px;
+    border-bottom: 1px solid #eee;
+  }
+  
+  li:last-child {
+    border-bottom: none; /* Убираем границу у последнего элемента */
+  }
+  
+  input[type="checkbox"] {
+    margin-right: 5px; /* Отступ между чекбоксом и текстом */
+    vertical-align: middle; /* Выравниваем чекбокс по вертикали */
+    cursor: pointer; /* Меняем курсор на руку */
+  }
+  
+  label {
+    cursor: pointer; /* Меняем курсор на руку */
+  }

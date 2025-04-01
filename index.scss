@@ -1,0 +1,50 @@
+@import 'zeroing.scss';
+  //  @import 'modul/leftBlockTop/index.scss';
+  //  @import 'modul/filePathTab/index.scss';
+  //  @import 'modul/ul_left/index.scss';
+      @import 'modul/block01/index.scss';
+      @import 'modul/block02/index.scss';
+      @import 'modul/block03/index.scss';
+      @import 'modul/block04/index.scss';
+      @import 'modul/block05/index.scss';
+      @import 'modul/block06/index.scss';
+/* *----------------
+* @param body
+*
+*/
+
+body {
+  
+
+}
+    .container {
+      display: flex;
+      height: 100vh;
+    }
+    
+    .left-panel {
+      width: 40%;  //
+      background-color: #fcfcfc;
+    }
+    
+    .resize-handle {
+      width: 10px;
+      background-color: #ccc;
+      cursor: col-resize;
+    }
+    
+    .right-panel {
+      flex: 1;
+      background-color: #ffffff;
+    }
+  
+
+    .bascic_top{
+      background-color: #eef2f5;
+      height: 50px;
+    }
+
+
+
+
+
