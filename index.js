@@ -1,7 +1,7 @@
 import "./index.scss"
 //import "images/big.jpg"
 import "./zeroing.scss"
-
+import { gethData, postData } from './fetchData.js'
 import { FileList } from './FileList.js'; // Импортируем FileList
 
 // const initialData = [
