@@ -91,11 +91,15 @@ class FileList extends HTMLElement {
       //const index = parseInt(clickedLi.dataset.index);
 
       const detail = { index: index }; // Создаем объект detail с индексом
-      this.dispatchEvent(new CustomEvent('item-double-click', {
+
+     //1 Создание объекта события (creating the event object)
+      const customEvent = new CustomEvent('item-double-click', {
         detail: detail, // Отправляем объект detail
         bubbles: true,
         composed: true
-      }));
+      })
+     // 2. Отправка события (dispatching the event)
+      this.dispatchEvent(customEvent);
     }
   }
 
@@ -158,7 +162,7 @@ class FileList extends HTMLElement {
       </ul>
     `;
 
-    
+
     this.shadow.querySelectorAll('li').forEach(li => {
       li.addEventListener('click', this.handleClick);
       li.addEventListener('dblclick', this.handleDoubleClick);
