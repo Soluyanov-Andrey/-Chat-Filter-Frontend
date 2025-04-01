@@ -2,7 +2,10 @@ class FileList extends HTMLElement {
   constructor() {
     super();
     this.shadow = this.attachShadow({ mode: 'open' });
-    this._dataLoader = null; // Используем приватное свойство _dataLoader
+    this.handleClick = this.handleClick.bind(this); // Привязываем контекст
+    this.handleDoubleClick = this.handleDoubleClick.bind(this);
+    this.selectedIndex = -1;
+    this._dataLoader = null;
   }
 
   static get observedAttributes() {
@@ -66,22 +69,16 @@ class FileList extends HTMLElement {
   }
 
   handleClick(event) {
-    const clickedLi = event.target.closest('li');
-    if (clickedLi) {
-      const index = Array.from(clickedLi.parentNode.children).indexOf(clickedLi); // Получаем индекс
+    const hoveredLi = event.target.closest('li');
+    if (hoveredLi) {
+      // Получаем индекс наведенного элемента
+      const index = Array.from(hoveredLi.parentNode.children).indexOf(hoveredLi);
 
-      // Получаем данные из атрибута data-index
-      //const index = parseInt(clickedLi.dataset.index);
-
-      const detail = { index: index };  // Создаем объект detail с индексом
-      this.dispatchEvent(new CustomEvent('item-click', {
-        detail: detail,  // Отправляем объект detail
-        bubbles: true,
-        composed: true
-      }));
+      // Добавляем класс "hovered"
+      hoveredLi.classList.add('hovered');
     }
+    
   }
-
   handleDoubleClick(event) {
     const clickedLi = event.target.closest('li');
     if (clickedLi) {
@@ -91,7 +88,7 @@ class FileList extends HTMLElement {
       //const index = parseInt(clickedLi.dataset.index);
 
       const detail = { index: index }; // Создаем объект detail с индексом
-
+     // Через регестрацию собственых событий и их вызова вы передаем события и его результат во вне
      //1 Создание объекта события (creating the event object)
       const customEvent = new CustomEvent('item-double-click', {
         detail: detail, // Отправляем объект detail
@@ -102,6 +99,21 @@ class FileList extends HTMLElement {
       this.dispatchEvent(customEvent);
     }
   }
+
+ // Использовать mouseenter и mouseleave, чтобы избежать проблем с вложенными элементами
+ handleMouseEnter(event) {
+  const hoveredLi = event.target.closest('li');
+  if (hoveredLi) {
+    hoveredLi.classList.add('selected');
+  }
+}
+
+handleMouseLeave(event) {
+  const hoveredLi = event.target.closest('li');
+  if (hoveredLi) {
+    hoveredLi.classList.remove('selected');
+  }
+}
 
 
   render() {
@@ -155,7 +167,7 @@ class FileList extends HTMLElement {
 
           return `
             <li class="${isSelected ? 'selected' : ''}" data-index="${index}">
-              <img src="" alt="${altText}"> ${item.name}
+              <img src="${imageUrl}" alt="${altText}"> ${item.name}
             </li>
           `;
         }).join('')}
@@ -164,8 +176,10 @@ class FileList extends HTMLElement {
 
 
     this.shadow.querySelectorAll('li').forEach(li => {
-      li.addEventListener('click', this.handleClick);
+      li.addEventListener('mouseover', this.handleClick);
       li.addEventListener('dblclick', this.handleDoubleClick);
+      li.addEventListener('mouseenter', this.handleMouseEnter); // Изменено
+      li.addEventListener('mouseleave', this.handleMouseLeave); // Изменено
     });
 
   }
