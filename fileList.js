@@ -176,7 +176,7 @@ handleMouseLeave(event) {
 
 
     this.shadow.querySelectorAll('li').forEach(li => {
-      li.addEventListener('mouseover', this.handleClick);
+      
       li.addEventListener('dblclick', this.handleDoubleClick);
       li.addEventListener('mouseenter', this.handleMouseEnter); // Изменено
       li.addEventListener('mouseleave', this.handleMouseLeave); // Изменено

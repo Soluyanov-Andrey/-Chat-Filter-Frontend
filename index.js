@@ -4,6 +4,7 @@ import "./zeroing.scss"
 import { gethData, postData } from './fetchData.js'
 import { FileList } from './fileList.js'; // Импортируем FileList
 import FolderService from './serviceApi.js';
+import makePanelResizable from './limiterMovement.js'
 // const initialData = [
 //   { name: ' sh скрипты1', type: 'folder-' },
 //   { name: '7zip', type: 'folder+' },
@@ -14,33 +15,25 @@ import FolderService from './serviceApi.js';
 const fileListElement = document.getElementById('my-file-list');
 // fileListElement.data = initialData;
 
-const path = "/media/andrey/Рабочий/flash/linux/manul"; // Пример пути, который нужно передать
-const encodedPath = encodeURIComponent(path); // Кодируем путь для URL
+// const path = "/media/andrey/Рабочий/flash/linux/manul"; // Пример пути, который нужно передать
+// const encodedPath = encodeURIComponent(path); // Кодируем путь для URL
 
 
-const apiUrl = `http://localhost:3000/folder-structure?path=${encodedPath}`; // Замените на ваш URL
+// const apiUrl = `http://localhost:3000/folder-structure?path=${encodedPath}`; // Замените на ваш URL
 
-// fetch(apiUrl)
-//   .then(response => {
-//     if (!response.ok) {
-//       throw new Error(`HTTP error! status: ${response.status}`);
-//     }
-//     return response.json();
-//   })
-//   .then(data => {
-//     fileListElement.data = data.receivedData.folders; 
-//     console.log(data.receivedData.folders); // Обработайте данные, полученные от API
-//     // Здесь можно обновить UI, отобразить данные и т.д.
-//   })
-//   .catch(error => {
-//     console.error('Ошибка при получении данных:', error);
-//     // Здесь можно отобразить сообщение об ошибке пользователю
-//   });
 
-fileListElement.dataLoader = async () => {
-  const path = "/media/andrey/Рабочий/flash/linux/manul";
-  return await FolderService.getFolderStructure(path);
+let currentPath = "/media/andrey/Рабочий/flash/linux/manul"; // Объявляем переменную
+
+// Функция для создания dataLoader (как в предыдущем примере)
+const createDataLoader = (path) => {
+  return async () => {
+    return await FolderService.getFolderStructure(path);
+  };
 };
+
+// Инициализация dataLoader (с начальным путем)
+fileListElement.dataLoader = createDataLoader(currentPath); // Создаем dataLoader
+
 
 document.addEventListener('item-click', (event) => {
   const index = event.detail.index; // Получаем индекс из detail
@@ -51,44 +44,50 @@ document.addEventListener('item-click', (event) => {
   alert(`Вы кликнули на: ${item ? item.name : ' (элемент не найден)'}`); // Проверяем item на null
 });
 
-document.addEventListener('item-double-click', (event) => {
-  const index = event.detail.index; // Получаем индекс из detail
-  const data = fileListElement.data; // Получаем данные из компонента
-  const item = data[index]; // Получаем элемент данных по индексу
+document.addEventListener('item-double-click', async (event) => {
+  const index = event.detail.index;
+  const data = fileListElement.data;
+  const item = data[index];
 
-  console.log('Двойной клик на элементе:', item, index);
-  alert(`Двойной клик на: ${item ? item.name : ' (элемент не найден)'}`); // Проверяем item на null
-});
+  if (item && item.type.startsWith('folder') && item.name) {
+    const folderName = item.name;
 
-
-
-
-const resizeHandle = document.querySelector('.resize-handle');
-const leftPanel = document.querySelector('.left-panel');
-const container = document.querySelector('.container');
-
-let isResizing = false;
-
-resizeHandle.addEventListener('mousedown', (e) => {
-  isResizing = true;
-  document.addEventListener('mousemove', resize);
-  document.addEventListener('mouseup', stopResize);
-});
-
-function resize(e) {
-  if (isResizing) {
-    
-    const newWidth = e.clientX - container.offsetLeft;
-    if(newWidth>600 && newWidth<1500){
-    leftPanel.style.width = `${newWidth}px`;
+    // Формируем новый путь
+    let newPath = currentPath;
+    if (!currentPath.endsWith('/')) {
+      newPath += '/';
     }
-  }
-}
+    newPath += folderName;
 
-function stopResize() {
-  isResizing = false;
-  document.removeEventListener('mousemove', resize);
-}
+    // Обновляем currentPath
+    currentPath = newPath; // Обновляем текущий путь
+
+    // Обновляем dataLoader
+    fileListElement.dataLoader = createDataLoader(currentPath);
+
+    // Загружаем данные
+    try {
+      const newData = await FolderService.getFolderStructure(currentPath);  // Используем currentPath
+      fileListElement.data = newData;
+    } catch (error) {
+      console.error('Ошибка при загрузке данных:', error);
+      alert('Ошибка при переходе в папку.');
+    }
+  } else {
+    console.log('Двойной клик на файле:', item, index);
+    alert(`Вы двойным кликом выбрали файл: ${item ? item.name : ' (элемент не найден)'}`);
+  }
+});
+
+const backBtn = document.getElementById("backBtn");
+
+
+// Загружаем код для перетаскивания разделительной линии
+document.addEventListener('DOMContentLoaded', function() {
+  makePanelResizable('.resize-handle', '.left-panel', '.container');
+});
+
+
 
 
 
