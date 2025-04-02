@@ -2,14 +2,17 @@ class FileList extends HTMLElement {
   constructor() {
     super();
     this.shadow = this.attachShadow({ mode: 'open' });
-    this.handleClick = this.handleClick.bind(this); // Привязываем контекст
+    this.handleClick = this.handleClick.bind(this);
     this.handleDoubleClick = this.handleDoubleClick.bind(this);
+    this.handleMouseEnter = this.handleMouseEnter.bind(this);
+    this.handleMouseLeave = this.handleMouseLeave.bind(this);
     this.selectedIndex = -1;
     this._dataLoader = null;
+    this.singleClickTimeout = null; // Добавлено свойство
   }
 
   static get observedAttributes() {
-    return ['data']; // data - отслеживаемый атрибут, как и раньше
+    return ['data'];
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
@@ -19,8 +22,8 @@ class FileList extends HTMLElement {
   }
 
   connectedCallback() {
-    this.render(); // Рендерим даже без данных
-    this.loadData(); // Загружаем данные
+    this.render();
+    this.loadData();
   }
 
   get data() {
@@ -36,7 +39,6 @@ class FileList extends HTMLElement {
     this.setAttribute('data', JSON.stringify(value));
   }
 
-  // Геттер и сеттер для dataLoader
   get dataLoader() {
     return this._dataLoader;
   }
@@ -47,10 +49,9 @@ class FileList extends HTMLElement {
       return;
     }
     this._dataLoader = value;
-    this.loadData(); // Автоматически загружаем данные при установке dataLoader
+    this.loadData();
   }
 
-  // Функция для загрузки данных
   async loadData() {
     if (!this._dataLoader) {
       console.warn('FileList: dataLoader не предоставлен. Компонент будет отображать пустой список.');
@@ -59,62 +60,93 @@ class FileList extends HTMLElement {
     }
 
     try {
-      this.shadow.innerHTML = `<p>Загрузка данных...</p>`; // Сообщение о загрузке
-      const data = await this._dataLoader(); // Используем приватное свойство _dataLoader
-      this.data = data; // Устанавливаем данные
+      this.shadow.innerHTML = `<p>Загрузка данных...</p>`;
+      const data = await this._dataLoader();
+      this.data = data;
     } catch (error) {
       console.error('Ошибка при загрузке данных:', error);
       this.shadow.innerHTML = `<p>Ошибка загрузки данных: ${error}</p>`;
     }
   }
 
+
   handleClick(event) {
-    const hoveredLi = event.target.closest('li');
-    if (hoveredLi) {
-      // Получаем индекс наведенного элемента
-      const index = Array.from(hoveredLi.parentNode.children).indexOf(hoveredLi);
-
-      // Добавляем класс "hovered"
-      hoveredLi.classList.add('hovered');
-    }
-    
-  }
-  handleDoubleClick(event) {
     const clickedLi = event.target.closest('li');
-    if (clickedLi) {
-      const index = Array.from(clickedLi.parentNode.children).indexOf(clickedLi); // Получаем индекс
 
-      // Получаем данные из атрибута data-index
-      //const index = parseInt(clickedLi.dataset.index);
+  if (clickedLi) {
+    // Очищаем таймаут, если он уже установлен (значит, был первый клик)
+    if (this.singleClickTimeout) {
+      clearTimeout(this.singleClickTimeout);
+      this.singleClickTimeout = null;
+    }
 
-      const detail = { index: index }; // Создаем объект detail с индексом
-     // Через регестрацию собственых событий и их вызова вы передаем события и его результат во вне
-     //1 Создание объекта события (creating the event object)
-      const customEvent = new CustomEvent('item-double-click', {
-        detail: detail, // Отправляем объект detail
+    // Устанавливаем таймаут, который выполнится, если не произойдет двойной клик
+    this.singleClickTimeout = setTimeout(() => {
+      console.log('Single click');
+      const index = Array.from(clickedLi.parentNode.children).indexOf(clickedLi);
+
+      // Toggle the 'active' class for clicked state
+      if (clickedLi.classList.contains('active')) {
+        clickedLi.classList.remove('active');
+      } else {
+          //Remove active class from other elements
+          this.shadow.querySelectorAll('li.active').forEach(el => {
+            el.classList.remove('active');
+          });
+        clickedLi.classList.add('active');
+      }
+
+      const detail = { index: index };
+      this.dispatchEvent(new CustomEvent('item-click', {
+        detail: detail,
         bubbles: true,
         composed: true
-      })
-     // 2. Отправка события (dispatching the event)
+      }));
+      // Здесь ваш код обработки одиночного клика
+      this.singleClickTimeout = null; // Очищаем таймаут
+    }, 200); // Время ожидания в миллисекундах (настройте по необходимости)
+  }
+  }
+
+
+
+  handleDoubleClick(event) {
+    const clickedLi = event.target.closest('li');
+
+    if (clickedLi) {
+      // Очищаем таймаут, чтобы предотвратить срабатывание одиночного клика
+      if (this.singleClickTimeout) {
+        clearTimeout(this.singleClickTimeout);
+        this.singleClickTimeout = null;
+      }
+
+      const index = Array.from(clickedLi.parentNode.children).indexOf(clickedLi);
+
+      const detail = { index: index };
+      const customEvent = new CustomEvent('item-double-click', {
+        detail: detail,
+        bubbles: true,
+        composed: true
+      });
       this.dispatchEvent(customEvent);
     }
   }
 
- // Использовать mouseenter и mouseleave, чтобы избежать проблем с вложенными элементами
- handleMouseEnter(event) {
-  const hoveredLi = event.target.closest('li');
-  if (hoveredLi) {
-    hoveredLi.classList.add('selected');
-  }
-}
 
-handleMouseLeave(event) {
-  const hoveredLi = event.target.closest('li');
-  if (hoveredLi) {
-    hoveredLi.classList.remove('selected');
-  }
-}
 
+  handleMouseEnter(event) {
+    const hoveredLi = event.target.closest('li');
+    if (hoveredLi) {
+      hoveredLi.classList.add('selected');
+    }
+  }
+
+  handleMouseLeave(event) {
+    const hoveredLi = event.target.closest('li');
+    if (hoveredLi) {
+      hoveredLi.classList.remove('selected');
+    }
+  }
 
   render() {
     const data = this.data;
@@ -146,6 +178,11 @@ handleMouseLeave(event) {
         ul.block03 li.selected {
           background-color: #def;
         }
+
+        ul.block03 li.active {
+          background-color: yellow; /* Стиль при клике */
+        }
+
       </style>
       <ul class="block03">
         ${data.map((item, index) => {
@@ -174,12 +211,13 @@ handleMouseLeave(event) {
       </ul>
     `;
 
-
     this.shadow.querySelectorAll('li').forEach(li => {
-      
+
       li.addEventListener('dblclick', this.handleDoubleClick);
-      li.addEventListener('mouseenter', this.handleMouseEnter); // Изменено
-      li.addEventListener('mouseleave', this.handleMouseLeave); // Изменено
+      li.addEventListener('mouseenter', this.handleMouseEnter);
+      li.addEventListener('mouseleave', this.handleMouseLeave);
+      li.addEventListener('click', this.handleClick);
+
     });
 
   }

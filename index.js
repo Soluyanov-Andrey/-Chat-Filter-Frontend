@@ -66,7 +66,7 @@ document.addEventListener('item-click', (event) => {
   const item = data[index]; // Получаем элемент данных по индексу
 
   console.log('Кликнули на элемент:', item, index);
-  alert(`Вы кликнули на: ${item ? item.name : ' (элемент не найден)'}`); // Проверяем item на null
+ 
 });
 
 document.addEventListener('item-double-click', async (event) => {
