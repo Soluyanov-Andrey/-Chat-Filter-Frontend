@@ -5,6 +5,7 @@ import { gethData, postData } from './fetchData.js'
 import { FileList } from './fileList.js'; // Импортируем FileList
 import FolderService from './serviceApi.js';
 import makePanelResizable from './limiterMovement.js'
+import removeLastDirectoryFromPath from './additionalFunctions.js'
 // const initialData = [
 //   { name: ' sh скрипты1', type: 'folder-' },
 //   { name: '7zip', type: 'folder+' },
@@ -12,15 +13,33 @@ import makePanelResizable from './limiterMovement.js'
 //   { name: 'chrom', type: 'file' }
 // ];
 
+let currentPath = "/media/andrey/Рабочий/flash/linux/manul"; // Объявляем переменную
+
 const fileListElement = document.getElementById('my-file-list');
 const backBtn = document.getElementById("backBtn");
 
 
 
+async function handleBackButtonClick() {
+  let newPath = removeLastDirectoryFromPath(currentPath);
+  
+    // Загружаем данные
+    try {
+      const newData = await FolderService.getFolderStructure(newPath);  // Используем currentPath
+      fileListElement.data = newData;
+      currentPath =  newPath;
+         
+    } catch (error) {
+      console.error('Ошибка при загрузке данных:', error);
+      alert('Ошибка при переходе в папку.');
+    }
+ 
+}
+
 //---------------------------------------
 // блок вызова fileListElement.dataLoader
 //---------------------------------------
-let currentPath = "/media/andrey/Рабочий/flash/linux/manul"; // Объявляем переменную
+
 
 const createDataLoader = (path) => {
   return async () => {
@@ -33,7 +52,7 @@ fileListElement.dataLoader = createDataLoader(currentPath); // Создаем da
 //---------------------------------------
 
 
-
+backBtn.addEventListener("click", handleBackButtonClick);
 
 //------------------------------------------
 // Обработка обработчиков из fileListElement

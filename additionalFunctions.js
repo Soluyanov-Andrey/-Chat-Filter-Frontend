@@ -1,4 +1,4 @@
-function removeLastDirectoryFromPath(path) {
+export default function removeLastDirectoryFromPath(path) {
     // Handle empty path (Обработка пустого пути)
     if (!path) {
       return ""; // Or null, or throw an error, depending on your needs
@@ -28,10 +28,18 @@ function removeLastDirectoryFromPath(path) {
     return newPath || "/";  // Ensure we return "/" for the root directory
   }
   
-  export default removeLastDirectoryFromPath
+ 
 
-  // Example usage:
-//   const path = "/media/andrey/Рабочий/flash/linux/manul";
-//   const newPath = removeLastDirectoryFromPath(path);
-//   console.log(`Original path: ${path}`);
-//   console.log(`New path: ${newPath}`);  // Output: /media/andrey/Рабочий/flash/linux
+export default function updateTextInput(text, inputElementSelector) {
+    // 1. Get the input element (получаем элемент input)
+    const inputElement = document.querySelector(inputElementSelector);
+  
+    // 2. Check if the element exists (проверяем, существует ли элемент)
+    if (!inputElement) {
+      console.error(`Element with selector "${inputElementSelector}" not found.`);
+      return; // Exit the function if the element is not found
+    }
+  
+    // 3. Update the value of the input element (обновляем значение элемента input)
+    inputElement.value = text;
+  }
