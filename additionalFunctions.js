@@ -1,4 +1,4 @@
-export default function removeLastDirectoryFromPath(path) {
+export  function removeLastDirectoryFromPath(path) {
     // Handle empty path (Обработка пустого пути)
     if (!path) {
       return ""; // Or null, or throw an error, depending on your needs
@@ -30,7 +30,7 @@ export default function removeLastDirectoryFromPath(path) {
   
  
 
-export default function updateTextInput(text, inputElementSelector) {
+export  function updateTextInput(text, inputElementSelector) {
     // 1. Get the input element (получаем элемент input)
     const inputElement = document.querySelector(inputElementSelector);
   

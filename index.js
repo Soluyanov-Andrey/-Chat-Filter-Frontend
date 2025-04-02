@@ -5,7 +5,8 @@ import { gethData, postData } from './fetchData.js'
 import { FileList } from './fileList.js'; // Импортируем FileList
 import FolderService from './serviceApi.js';
 import makePanelResizable from './limiterMovement.js'
-import removeLastDirectoryFromPath from './additionalFunctions.js'
+import { removeLastDirectoryFromPath , updateTextInput } from './additionalFunctions.js'
+
 // const initialData = [
 //   { name: ' sh скрипты1', type: 'folder-' },
 //   { name: '7zip', type: 'folder+' },
@@ -22,7 +23,7 @@ const backBtn = document.getElementById("backBtn");
 
 async function handleBackButtonClick() {
   let newPath = removeLastDirectoryFromPath(currentPath);
-  
+  updateTextInput(newPath,"#input");
     // Загружаем данные
     try {
       const newData = await FolderService.getFolderStructure(newPath);  // Используем currentPath
@@ -43,6 +44,7 @@ async function handleBackButtonClick() {
 
 const createDataLoader = (path) => {
   return async () => {
+    updateTextInput(path,"#input");
     return await FolderService.getFolderStructure(path);
   };
 };
@@ -72,6 +74,7 @@ document.addEventListener('item-double-click', async (event) => {
   const data = fileListElement.data;
   const item = data[index];
 
+  
   if (item && item.type.startsWith('folder') && item.name) {
     const folderName = item.name;
 
@@ -84,7 +87,7 @@ document.addEventListener('item-double-click', async (event) => {
 
     // Обновляем currentPath
     currentPath = newPath; // Обновляем текущий путь
-
+    updateTextInput(newPath,"#input");
     // Обновляем dataLoader
     fileListElement.dataLoader = createDataLoader(currentPath);
 
