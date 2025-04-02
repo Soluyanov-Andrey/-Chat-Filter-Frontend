@@ -13,18 +13,15 @@ import makePanelResizable from './limiterMovement.js'
 // ];
 
 const fileListElement = document.getElementById('my-file-list');
-// fileListElement.data = initialData;
-
-// const path = "/media/andrey/Рабочий/flash/linux/manul"; // Пример пути, который нужно передать
-// const encodedPath = encodeURIComponent(path); // Кодируем путь для URL
+const backBtn = document.getElementById("backBtn");
 
 
-// const apiUrl = `http://localhost:3000/folder-structure?path=${encodedPath}`; // Замените на ваш URL
 
-
+//---------------------------------------
+// блок вызова fileListElement.dataLoader
+//---------------------------------------
 let currentPath = "/media/andrey/Рабочий/flash/linux/manul"; // Объявляем переменную
 
-// Функция для создания dataLoader (как в предыдущем примере)
 const createDataLoader = (path) => {
   return async () => {
     return await FolderService.getFolderStructure(path);
@@ -33,7 +30,14 @@ const createDataLoader = (path) => {
 
 // Инициализация dataLoader (с начальным путем)
 fileListElement.dataLoader = createDataLoader(currentPath); // Создаем dataLoader
+//---------------------------------------
 
+
+
+
+//------------------------------------------
+// Обработка обработчиков из fileListElement
+//------------------------------------------
 
 document.addEventListener('item-click', (event) => {
   const index = event.detail.index; // Получаем индекс из detail
@@ -79,14 +83,16 @@ document.addEventListener('item-double-click', async (event) => {
   }
 });
 
-const backBtn = document.getElementById("backBtn");
 
-
+//-------------------------------------------------------
 // Загружаем код для перетаскивания разделительной линии
+//-------------------------------------------------------
+
 document.addEventListener('DOMContentLoaded', function() {
   makePanelResizable('.resize-handle', '.left-panel', '.container');
 });
 
+//-------------------------------------------------------
 
 
 
