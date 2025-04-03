@@ -3,7 +3,7 @@ import "./zeroing.scss"
 import { gethData, postData } from './fetchData.js'
 import { FileList } from './fileList.js'; // Импортируем FileList
 import { MessageModal } from './CustomModal.js'; // Импортируем FileList
-import { FolderStructureService } from './serviceApi.js';
+import { FolderStructureService , createFolderApi} from './serviceApi.js';
 import makePanelResizable from './limiterMovement.js'
 import { removeLastDirectoryFromPath , updateTextInput } from './additionalFunctions.js'
 
@@ -14,7 +14,7 @@ let lastClickedItem = null;  // Внешняя переменная для item
 let currentPath = "/media/andrey/Рабочий/flash/linux/manul"; // Объявляем переменную
 
 const fileListElement = document.getElementById('my-file-list');
-
+const modal = document.getElementById('message-modal');
 
 
 
@@ -35,7 +35,6 @@ async function handleBackButtonClick() {
          
     } catch (error) {
       console.error('Ошибка при загрузке данных:', error);
-      alert('Ошибка при переходе в папку.');
     }
  
 }
@@ -44,17 +43,35 @@ backBtn.addEventListener("click", handleBackButtonClick);
 
 
 
-const modal = document.querySelector('message-modal');
+
 const addFolderBtn = document.getElementById("addFolderBtn");
 
- function handleAddFolderButtonClick() {
+async function handleAddFolderButtonClick() {
 
- console.log(modal);
+  if (lastClickedItem?.type === 'folder+') {
+    
+    modal.openModal("В папке уже есть папка document");
+    return;
+  }
 
- modal.openModal("Новое сообщение из JavaScript!"); 
- console.log(currentPath);
- console.log(lastClickedItem);
- 
+  if (lastClickedItem){
+  let path = currentPath+'/'+lastClickedItem.name;
+
+    await createFolderApi(path);
+    modal.openModal("Папка создана");
+    // Загружаем данные
+    try {
+      const newData = await FolderStructureService.getFolderStructure(currentPath);  // Используем currentPath
+      fileListElement.data = newData;
+      
+        
+    } catch (error) {
+      console.error('Ошибка при загрузке данных:', error);
+    }
+    
+    
+
+  }
 }
 
 addFolderBtn.addEventListener("click", handleAddFolderButtonClick);
@@ -65,7 +82,7 @@ addFolderBtn.addEventListener("click", handleAddFolderButtonClick);
 
 
 //-------------------------------------------------------------------------------
-// блок вызова fileListElement.dataLoader
+// Блок вызова fileListElement.dataLoader
 //-------------------------------------------------------------------------------
 
 
@@ -128,11 +145,10 @@ document.addEventListener('item-double-click', async (event) => {
       lastClickedItem = null;
     } catch (error) {
       console.error('Ошибка при загрузке данных:', error);
-      alert('Ошибка при переходе в папку.');
     }
   } else {
     console.log('Двойной клик на файле:', item, index);
-    alert(`Вы двойным кликом выбрали файл: ${item ? item.name : ' (элемент не найден)'}`);
+    
   }
 });
 
