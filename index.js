@@ -1,26 +1,28 @@
 import "./index.scss"
-//import "images/big.jpg"
 import "./zeroing.scss"
 import { gethData, postData } from './fetchData.js'
 import { FileList } from './fileList.js'; // Импортируем FileList
+import { MessageModal } from './CustomModal.js'; // Импортируем FileList
 import { FolderStructureService } from './serviceApi.js';
 import makePanelResizable from './limiterMovement.js'
 import { removeLastDirectoryFromPath , updateTextInput } from './additionalFunctions.js'
 
-// const initialData = [
-//   { name: ' sh скрипты1', type: 'folder-' },
-//   { name: '7zip', type: 'folder+' },
-//   { name: 'UFW сетевой экран', type: 'folder-' },
-//   { name: 'chrom', type: 'file' }
-// ];
+
+let lastClickedItem = null;  // Внешняя переменная для item
+
 
 let currentPath = "/media/andrey/Рабочий/flash/linux/manul"; // Объявляем переменную
 
 const fileListElement = document.getElementById('my-file-list');
+
+
+
+
+//-------------------------------------------------------------------------------
+// блок вызова событий на кнопки
+//-------------------------------------------------------------------------------
+
 const backBtn = document.getElementById("backBtn");
-
-
-
 async function handleBackButtonClick() {
   let newPath = removeLastDirectoryFromPath(currentPath);
   updateTextInput(newPath,"#input");
@@ -29,6 +31,7 @@ async function handleBackButtonClick() {
       const newData = await FolderStructureService.getFolderStructure(newPath);  // Используем currentPath
       fileListElement.data = newData;
       currentPath =  newPath;
+      lastClickedItem = null;
          
     } catch (error) {
       console.error('Ошибка при загрузке данных:', error);
@@ -36,10 +39,34 @@ async function handleBackButtonClick() {
     }
  
 }
+backBtn.addEventListener("click", handleBackButtonClick);
 
-//---------------------------------------
+
+
+
+const modal = document.querySelector('message-modal');
+const addFolderBtn = document.getElementById("addFolderBtn");
+
+ function handleAddFolderButtonClick() {
+
+ console.log(modal);
+
+ modal.openModal("Новое сообщение из JavaScript!"); 
+ console.log(currentPath);
+ console.log(lastClickedItem);
+ 
+}
+
+addFolderBtn.addEventListener("click", handleAddFolderButtonClick);
+
+//-------------------------------------------------------------------------------
+
+
+
+
+//-------------------------------------------------------------------------------
 // блок вызова fileListElement.dataLoader
-//---------------------------------------
+//-------------------------------------------------------------------------------
 
 
 const createDataLoader = (path) => {
@@ -51,21 +78,24 @@ const createDataLoader = (path) => {
 
 // Инициализация dataLoader (с начальным путем)
 fileListElement.dataLoader = createDataLoader(currentPath); // Создаем dataLoader
-//---------------------------------------
+//-------------------------------------------------------------------------------
 
 
-backBtn.addEventListener("click", handleBackButtonClick);
 
-//------------------------------------------
+
+//-------------------------------------------------------------------------------
 // Обработка обработчиков из fileListElement
-//------------------------------------------
+//-------------------------------------------------------------------------------
 
 document.addEventListener('item-click', (event) => {
   const index = event.detail.index; // Получаем индекс из detail
   const data = fileListElement.data; // Получаем данные из компонента
   const item = data[index]; // Получаем элемент данных по индексу
 
-  console.log('Кликнули на элемент:', item, index);
+  lastClickedItem = item; // Записываем во внешнюю переменную
+ 
+
+  console.log('Кликнули на элемент:', item);
  
 });
 
@@ -93,8 +123,9 @@ document.addEventListener('item-double-click', async (event) => {
 
     // Загружаем данные
     try {
-      const newData = await FolderService.getFolderStructure(currentPath);  // Используем currentPath
+      const newData = await FolderStructureService.getFolderStructure(currentPath);  // Используем currentPath
       fileListElement.data = newData;
+      lastClickedItem = null;
     } catch (error) {
       console.error('Ошибка при загрузке данных:', error);
       alert('Ошибка при переходе в папку.');
@@ -106,15 +137,15 @@ document.addEventListener('item-double-click', async (event) => {
 });
 
 
-//-------------------------------------------------------
+//-------------------------------------------------------------------------------
 // Загружаем код для перетаскивания разделительной линии
-//-------------------------------------------------------
+//-------------------------------------------------------------------------------
 
 document.addEventListener('DOMContentLoaded', function() {
   makePanelResizable('.resize-handle', '.left-panel', '.container');
 });
 
-//-------------------------------------------------------
+//-------------------------------------------------------------------------------
 
 
 

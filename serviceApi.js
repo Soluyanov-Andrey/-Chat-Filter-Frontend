@@ -40,8 +40,3 @@ import { gethData } from './fetchData.js';
       }
     }
   };
-
-  export const object2 = {
-    name: 'Object 2',
-    value: 2
-  };
