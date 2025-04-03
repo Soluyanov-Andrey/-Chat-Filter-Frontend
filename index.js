@@ -3,7 +3,7 @@ import "./index.scss"
 import "./zeroing.scss"
 import { gethData, postData } from './fetchData.js'
 import { FileList } from './fileList.js'; // Импортируем FileList
-import FolderService from './serviceApi.js';
+import { FolderStructureService } from './serviceApi.js';
 import makePanelResizable from './limiterMovement.js'
 import { removeLastDirectoryFromPath , updateTextInput } from './additionalFunctions.js'
 
@@ -26,7 +26,7 @@ async function handleBackButtonClick() {
   updateTextInput(newPath,"#input");
     // Загружаем данные
     try {
-      const newData = await FolderService.getFolderStructure(newPath);  // Используем currentPath
+      const newData = await FolderStructureService.getFolderStructure(newPath);  // Используем currentPath
       fileListElement.data = newData;
       currentPath =  newPath;
          
@@ -45,7 +45,7 @@ async function handleBackButtonClick() {
 const createDataLoader = (path) => {
   return async () => {
     updateTextInput(path,"#input");
-    return await FolderService.getFolderStructure(path);
+    return await FolderStructureService.getFolderStructure(path);
   };
 };
 
