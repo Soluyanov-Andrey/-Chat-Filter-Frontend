@@ -1,8 +1,12 @@
 import "./index.scss"
 import "./zeroing.scss"
 import { gethData, postData } from './fetchData.js'
-import { FileList } from './fileList.js'; // Импортируем FileList
-import { MessageModal } from './CustomModal.js'; // Импортируем FileList
+
+// Импортируем компаненты
+import { FileList } from './fileList.js'; 
+import { MessageModal } from './customModal.js'; 
+import { CheckboxList } from './checkboxList.js'; 
+
 import { FolderStructureService , createFolderApi} from './serviceApi.js';
 import makePanelResizable from './limiterMovement.js'
 import { removeLastDirectoryFromPath , updateTextInput } from './additionalFunctions.js'
@@ -15,12 +19,30 @@ let currentPath = "/media/andrey/Рабочий/flash/linux/manul"; // Объя�
 
 const fileListElement = document.getElementById('my-file-list');
 const modal = document.getElementById('message-modal');
+const checkboxList = document.getElementById('checkbox-list');
+
+
+  const newData = ["новый элемент 1", "новый элемент 2", "новый элемент 3",, "новый элемент 2", "новый элемент 3"];
+  const newDataString = JSON.stringify(newData);
+  checkboxList.setAttribute('data', newDataString);
 
 
 
 //-------------------------------------------------------------------------------
-// блок вызова событий на кнопки
+// блок вызова событий на кнопках
 //-------------------------------------------------------------------------------
+
+const scanBtn = document.getElementById("scanBtn");
+
+function getSelected() {
+  const selected = checkboxList.getSelectedIndices();
+  console.log("Выбранные элементы:", selected);
+}
+
+scanBtn.addEventListener("click", getSelected);
+
+
+
 
 const backBtn = document.getElementById("backBtn");
 async function handleBackButtonClick() {
