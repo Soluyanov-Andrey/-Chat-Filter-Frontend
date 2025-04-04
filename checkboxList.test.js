@@ -43,6 +43,11 @@ describe('CheckboxList Component Tests', () => {
     }, 0)); // Задержка 0 мс, чтобы дать время на перерисовку
   });
 
+
+  // Устанавливает данные в компонент checkboxList, не выбирая ни один из чекбоксов.
+  // Ждет, пока компонент перерисуется.
+  // Вызывает метод getSelectedIndices() для получения массива индексов выбранных чекбоксов.
+  // Проверяет, что массив индексов выбранных чекбоксов пуст, что означает, что ни один из чекбоксов не выбран.
   it('should return an empty array when no checkboxes are selected', () => {
     const initialData = ["строка1", "строка2", "еще строка"];
     checkboxList.setAttribute('data', JSON.stringify(initialData));
