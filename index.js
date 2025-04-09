@@ -7,7 +7,7 @@ import { FileList } from './fileList.js';
 import { MessageModal } from './customModal.js'; 
 import { CheckboxList } from './checkboxList.js'; 
 
-import { FolderStructureService , createFolderApi} from './serviceApi.js';
+import { FolderStructureService , createFolderApi, getScanApi} from './serviceApi.js';
 import makePanelResizable from './limiterMovement.js'
 import { removeLastDirectoryFromPath , updateTextInput } from './additionalFunctions.js'
 
@@ -16,6 +16,7 @@ let lastClickedItem = null;  // Внешняя переменная для item
 
 
 let currentPath = "/media/andrey/Рабочий/flash/linux/manul"; // Объявляем переменную
+let savecurrentPath = currentPath;
 
 const fileListElement = document.getElementById('my-file-list');
 const modal = document.getElementById('message-modal');
@@ -34,9 +35,25 @@ const checkboxList = document.getElementById('checkbox-list');
 
 const scanBtn = document.getElementById("scanBtn");
 
-function getSelected() {
-  const selected = checkboxList.getSelectedIndices();
-  console.log("Выбранные элементы:", selected);
+async function getSelected() {
+
+  const result = await getScanApi(currentPath);
+
+  if (result && result.receivedData) {
+    const receivedData = result.receivedData
+
+    const newDataString = JSON.stringify(receivedData);
+    checkboxList.setAttribute('data', newDataString);
+
+    console.log(receivedData); // Выведет массив receivedData
+    // Теперь вы можете работать с receivedData, например:
+    // receivedData.forEach(item => console.log(item)); // Выведет каждый элемент массива
+    // const firstItem = receivedData[0]; // Получить первый элемент
+    // console.log(firstItem);
+  } else {
+    console.log("Ошибка: receivedData не найдено или result равно null/undefined.");
+  }
+  
 }
 
 scanBtn.addEventListener("click", getSelected);
@@ -51,6 +68,10 @@ async function handleBackButtonClick() {
     // Загружаем данные
     try {
       const newData = await FolderStructureService.getFolderStructure(newPath);  // Используем currentPath
+      if( newPath != savecurrentPath) {
+      newData.unshift({ name: '...................', type: 'folder-' });
+      //тут происходит вставка в элемент fileListElement
+     }
       fileListElement.data = newData;
       currentPath =  newPath;
       lastClickedItem = null;
@@ -143,6 +164,14 @@ document.addEventListener('item-double-click', async (event) => {
   const data = fileListElement.data;
   const item = data[index];
 
+// Проверяем, нужно ли выполнить handleBackButtonClick
+if (item && item.name === '...................') {
+  handleBackButtonClick(); // Выполняем функцию
+
+  // Прерываем дальнейшее выполнение функции-обработчика
+  return; // Выходим из обработчика события
+}
+  
   
   if (item && item.type.startsWith('folder') && item.name) {
     const folderName = item.name;
@@ -162,7 +191,11 @@ document.addEventListener('item-double-click', async (event) => {
 
     // Загружаем данные
     try {
+
       const newData = await FolderStructureService.getFolderStructure(currentPath);  // Используем currentPath
+      newData.unshift({ name: '...................', type: 'folder-' });
+      
+      //тут происходит вставка в элемент fileListElement
       fileListElement.data = newData;
       lastClickedItem = null;
     } catch (error) {

@@ -45,3 +45,26 @@ import { gethData } from './fetchData.js';
       throw error;
     }
   };
+
+  export const getScanApi = async (path) => {
+   
+    const url = `${API_BASE_URL}/scan`; // Добавляем path как query parameter
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json', // Можно опустить для GET запросов
+        },
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+  
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Ошибка при получении папки (GET):', error);
+      throw error;
+    }
+  };

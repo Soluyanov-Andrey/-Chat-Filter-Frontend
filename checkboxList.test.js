@@ -81,3 +81,25 @@ describe('CheckboxList Component Tests', () => {
     }, 0));
   });
 });
+
+// Заметки
+
+// const newData = ["новый элемент 1", "новый элемент 2", "новый элемент 3",, "новый элемент 2", "новый элемент 3"];
+// const newDataString = JSON.stringify(newData);
+// checkboxList.setAttribute('data', newDataString);
+
+
+
+// //-------------------------------------------------------------------------------
+// // блок вызова событий на кнопках
+// //-------------------------------------------------------------------------------
+
+// const scanBtn = document.getElementById("scanBtn");
+
+// function getSelected() {
+// const selected = checkboxList.getSelectedIndices();
+// console.log("Выбранные элементы:", selected);
+
+// }
+
+// scanBtn.addEventListener("click", getSelected);
