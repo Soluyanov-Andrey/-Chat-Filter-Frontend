@@ -3,9 +3,9 @@ import "./zeroing.scss"
 import { gethData, postData } from './fetchData.js'
 
 // Импортируем компаненты
-import { FileList } from './fileList.js'; 
-import { MessageModal } from './customModal.js'; 
-import { CheckboxList } from './checkboxList.js'; 
+import { FileList } from './component/fileList.js'; 
+import { MessageModal } from './component/customModal.js'; 
+import { CheckboxList } from './component/checkboxList.js'; 
 
 import { FolderStructureService , createFolderApi, getScanApi} from './serviceApi.js';
 import makePanelResizable from './limiterMovement.js'
