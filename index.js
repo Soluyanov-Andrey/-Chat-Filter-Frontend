@@ -7,7 +7,7 @@ import { FileList } from './component/fileList.js';
 import { MessageModal } from './component/customModal.js'; 
 import { CheckboxList } from './component/checkboxList.js'; 
 
-import { FolderStructureService , createFolderApi, getScanApi} from './serviceApi.js';
+import { FolderStructureService , createFolderApi, getScanApi, deleteSelectApi } from './serviceApi.js';
 import makePanelResizable from './limiterMovement.js'
 import { removeLastDirectoryFromPath , updateTextInput } from './additionalFunctions.js'
 
@@ -23,6 +23,8 @@ const modal = document.getElementById('message-modal');
 const checkboxList = document.getElementById('checkbox-list');
 
 
+
+
   const newData = ["новый элемент 1", "новый элемент 2", "новый элемент 3",, "новый элемент 2", "новый элемент 3"];
   const newDataString = JSON.stringify(newData);
   checkboxList.setAttribute('data', newDataString);
@@ -33,14 +35,52 @@ const checkboxList = document.getElementById('checkbox-list');
 // блок вызова событий на кнопках
 //-------------------------------------------------------------------------------
 
+const deleteSelectBtn = document.getElementById('deleteSelectBtn');
+
+
+async function deleteSelect(){
+
+  let arraySelect = checkboxList.getSelectedIndices();
+  
+  
+   const result = await deleteSelectApi(arraySelect);
+   
+   if (result.message === 'Элементы успешно удалены') {
+    
+   
+
+    (async () => {
+      try {
+        const result = await getSelected();
+        
+        console.log("Результат getSelected:", result);
+        // ... Дальнейшая обработка результата ...
+      } catch (error) {
+        console.error("Ошибка при вызове getSelected:", error);
+        // Обработка ошибки
+      }
+    })();
+    modal.openModal(result.message);
+    return;
+  }
+}
+
+deleteSelectBtn.addEventListener("click", deleteSelect);
+
+
+
 const scanBtn = document.getElementById("scanBtn");
 
 async function getSelected() {
 
-  const result = await getScanApi(currentPath);
+  
+  const result = await getScanApi();
 
   if (result && result.receivedData) {
+
     const receivedData = result.receivedData
+
+    
 
     const newDataString = JSON.stringify(receivedData);
     checkboxList.setAttribute('data', newDataString);
@@ -62,26 +102,13 @@ scanBtn.addEventListener("click", getSelected);
 
 
 const backBtn = document.getElementById("backBtn");
-async function handleBackButtonClick() {
-  let newPath = removeLastDirectoryFromPath(currentPath);
-  updateTextInput(newPath,"#input");
-    // Загружаем данные
-    try {
-      const newData = await FolderStructureService.getFolderStructure(newPath);  // Используем currentPath
-      if( newPath != savecurrentPath) {
-      newData.unshift({ name: '...................', type: 'folder-' });
-      //тут происходит вставка в элемент fileListElement
-     }
-      fileListElement.data = newData;
-      currentPath =  newPath;
-      lastClickedItem = null;
-         
-    } catch (error) {
-      console.error('Ошибка при загрузке данных:', error);
-    }
- 
+
+function functionhanbackBtn() {
+  let b = checkboxList.getSelectedIndices()
+  console.log(b);
 }
-backBtn.addEventListener("click", handleBackButtonClick);
+
+backBtn.addEventListener("click", functionhanbackBtn);
 
 
 
@@ -147,6 +174,7 @@ fileListElement.dataLoader = createDataLoader(currentPath); // Создаем da
 // Обработка обработчиков из fileListElement
 //-------------------------------------------------------------------------------
 
+
 document.addEventListener('item-click', (event) => {
   const index = event.detail.index; // Получаем индекс из detail
   const data = fileListElement.data; // Получаем данные из компонента
@@ -158,6 +186,27 @@ document.addEventListener('item-click', (event) => {
   console.log('Кликнули на элемент:', item);
  
 });
+
+async function handleBackButtonClick(){
+  let newPath = removeLastDirectoryFromPath(currentPath);
+  updateTextInput(newPath,"#input");
+    // Загружаем данные
+    try {
+      const newData = await FolderStructureService.getFolderStructure(newPath);  // Используем currentPath
+      if( newPath != savecurrentPath) {
+      newData.unshift({ name: '...................', type: 'folder-' });
+      //тут происходит вставка в элемент fileListElement
+     }
+      fileListElement.data = newData;
+      currentPath =  newPath;
+      lastClickedItem = null;
+         
+    } catch (error) {
+      console.error('Ошибка при загрузке данных:', error);
+    }
+ 
+}
+
 
 document.addEventListener('item-double-click', async (event) => {
   const index = event.detail.index;

@@ -22,7 +22,7 @@ import { gethData } from './fetchData.js';
       }
     }
   };
-
+  //Создаем папку Document в указаной папки на сервере
   export const createFolderApi = async (path) => {
     const url = `${API_BASE_URL}/create-folder`;
     try {
@@ -41,12 +41,13 @@ import { gethData } from './fetchData.js';
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error('Ошибка при создании папки (POST):', error);
+      console.error('Ошибка при обработки createFolderApi', error);
       throw error;
     }
   };
 
-  export const getScanApi = async (path) => {
+  //Сканируем документ и выбираем темы
+  export const getScanApi = async () => {
    
     const url = `${API_BASE_URL}/scan`; // Добавляем path как query parameter
     try {
@@ -64,7 +65,31 @@ import { gethData } from './fetchData.js';
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error('Ошибка при получении папки (GET):', error);
+      console.error('Ошибка при обработки getScanApi', error);
+      throw error;
+    }
+  };
+
+  export const deleteSelectApi = async (arraySelect) => {
+    const url = `${API_BASE_URL}/delete_select`;
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(arraySelect)
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+  
+      const data = await response.json();
+      
+      return data;
+    } catch (error) {
+      console.error('Ошибка при обработки deleteSelect', error);
       throw error;
     }
   };
