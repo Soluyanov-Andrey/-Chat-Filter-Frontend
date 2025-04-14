@@ -154,8 +154,16 @@ class CheckboxList extends HTMLElement {
     } else {
       this._selectedIndices = this._selectedIndices.filter(i => i !== index + 1);
     }
-  }
 
+      // Генерируем событие с данными о выбранных элементах
+    this.dispatchEvent(new CustomEvent('selected-changed', { 
+      detail: this.getSelectedIndices(),
+      bubbles: true, // Всплывает вверх по DOM
+      composed: true // Преодолевает границу Shadow DOM
+
+    }));
+  }
+  
   /**
    * @method
    * @desc Возвращает массив индексов выбранных элементов.

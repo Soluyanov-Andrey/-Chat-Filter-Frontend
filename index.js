@@ -185,6 +185,23 @@ fileListElement.dataLoader = createDataLoader(currentPath); // Создаем da
 // Обработка обработчиков из зарегестрированных в компанентах
 //-------------------------------------------------------------------------------
 
+
+//fileListElement событие selected-changed
+//-------------------------------------------------------------------------------
+checkboxList.addEventListener('selected-changed', (event) => {
+  
+  const shouldDisable = Array.isArray(event.detail) 
+  ? event.detail.length === 0
+  : true; // отключаем, если это не массив
+
+  lookPageBtn.disabled = shouldDisable;
+
+  const selectedIndices = event.detail; // Теперь detail — это сам массив
+  console.log('Выбранные индексы:', selectedIndices);
+});
+//-------------------------------------------------------------------------------
+
+
 //fileListElement событие item-click
 //-------------------------------------------------------------------------------
 document.addEventListener('item-click', (event) => {
