@@ -93,7 +93,7 @@ class CheckboxList extends HTMLElement {
         .checkbox-item {
           display: flex;
           align-items: center;
-          margin-bottom: 0.5em;
+          margin-bottom: 1.0em;
         }
 
         input[type="checkbox"] {

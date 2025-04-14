@@ -95,6 +95,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const result = await deleteSelectApi(arraySelect);
     
     if (result.message === 'Элементы успешно удалены') {
+      lookPageBtn.disabled = true;
       (async () => {
         try {
           const result = await getSelected();
@@ -171,7 +172,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     pageLoaderInstance.remove(); //Удаляем компанент pageLoaderInstance
     checkboxList.classList.toggle('hidden', false);//Показываем classList меняя стиль
-    lookPageBtn.disabled = false; //Скрываем кнопку Смотрим страницы добавляя атрибут  disabled к html <button id="lookPageBtn" disabled>
+    lookPageBtn.disabled = false; //Показываем кнопку Смотрим страницы убирая атрибут  disabled к html <button id="lookPageBtn">
     backBtn.disabled = true; //Отображаем кнопку вернутся назад
 
   }
