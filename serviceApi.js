@@ -113,7 +113,31 @@ import { gethData } from './fetchData.js';
       
       return data;
     } catch (error) {
-      console.error('Ошибка при обработки deleteSelect', error);
+      console.error('Ошибка при обработки laveSelectApi', error);
+      throw error;
+    }
+  };
+
+  export const lookPageApi = async (arraySelect) => {
+    const url = `${API_BASE_URL}/lookPageBtn`;
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(arraySelect)
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+  
+      const data = await response.json();
+      
+      return data;
+    } catch (error) {
+      console.error('Ошибка при обработки lookPageApi ', error);
       throw error;
     }
   };
