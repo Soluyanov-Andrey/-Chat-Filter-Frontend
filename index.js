@@ -6,8 +6,11 @@ import { gethData, postData } from './fetchData.js'
 import { FileList } from './component/fileList.js'; 
 import { MessageModal } from './component/customModal.js'; 
 import { CheckboxList } from './component/checkboxList.js'; 
+import { PageLoader } from './component/pageLoader.js'; 
 
-import { FolderStructureService , createFolderApi, getScanApi, deleteSelectApi } from './serviceApi.js';
+import { FolderStructureService , createFolderApi, deleteSelectApi} from './serviceApi.js';
+import { getScanApi, laveSelectApi} from './serviceApi.js';
+
 import makePanelResizable from './limiterMovement.js'
 import { removeLastDirectoryFromPath , updateTextInput } from './additionalFunctions.js'
 
@@ -22,37 +25,32 @@ const fileListElement = document.getElementById('my-file-list');
 const modal = document.getElementById('message-modal');
 const checkboxList = document.getElementById('checkbox-list');
 
+const lookPageBtn = document.getElementById('lookPageBtn');
 
+function deleteSelect1(){
+  console.log('jj');
+  
+}
 
-
-  const newData = ["новый элемент 1", "новый элемент 2", "новый элемент 3",, "новый элемент 2", "новый элемент 3"];
-  const newDataString = JSON.stringify(newData);
-  checkboxList.setAttribute('data', newDataString);
-
+lookPageBtn.addEventListener("click", deleteSelect1);
 
 
 //-------------------------------------------------------------------------------
-// блок вызова событий на кнопках
+// блоки вызова событий на кнопках
 //-------------------------------------------------------------------------------
 
+//-------------------------------------------------------------------------------
 const deleteSelectBtn = document.getElementById('deleteSelectBtn');
-
-
 async function deleteSelect(){
 
   let arraySelect = checkboxList.getSelectedIndices();
-  
-  
+
    const result = await deleteSelectApi(arraySelect);
    
    if (result.message === 'Элементы успешно удалены') {
-    
-   
-
     (async () => {
       try {
         const result = await getSelected();
-        
         console.log("Результат getSelected:", result);
         // ... Дальнейшая обработка результата ...
       } catch (error) {
@@ -64,29 +62,50 @@ async function deleteSelect(){
     return;
   }
 }
-
 deleteSelectBtn.addEventListener("click", deleteSelect);
+//-------------------------------------------------------------------------------
 
 
+//-------------------------------------------------------------------------------
+const laveSelectBtn = document.getElementById('leaveSelectBtn');
+async function laveSelected(){
 
+  let arraySelect = checkboxList.getSelectedIndices();
+  
+   const result = await laveSelectApi(arraySelect);
+   if (result.message === 'Элементы успешно удалены') {
+    (async () => {
+      try {
+        const result = await getSelected();
+        
+        console.log("в laveSelected() Результат getSelected: ", result);
+        // ... Дальнейшая обработка результата ...
+      } catch (error) {
+        console.error("Ошибка при вызове getSelected в ", error);
+        // Обработка ошибки
+      }
+    })();
+    modal.openModal(result.message);
+    return;
+  }
+}
+laveSelectBtn.addEventListener("click", laveSelected);
+//-------------------------------------------------------------------------------
+
+//-------------------------------------------------------------------------------
 const scanBtn = document.getElementById("scanBtn");
-
 async function getSelected() {
 
-  
   const result = await getScanApi();
 
   if (result && result.receivedData) {
 
-    const receivedData = result.receivedData
-
-    
-
+    const receivedData = result.receivedData;
     const newDataString = JSON.stringify(receivedData);
     checkboxList.setAttribute('data', newDataString);
 
     console.log(receivedData); // Выведет массив receivedData
-    // Теперь вы можете работать с receivedData, например:
+    // Теперь можно работать с receivedData, например:
     // receivedData.forEach(item => console.log(item)); // Выведет каждый элемент массива
     // const firstItem = receivedData[0]; // Получить первый элемент
     // console.log(firstItem);
@@ -95,12 +114,10 @@ async function getSelected() {
   }
   
 }
-
 scanBtn.addEventListener("click", getSelected);
+//-------------------------------------------------------------------------------
 
-
-
-
+//-------------------------------------------------------------------------------
 const backBtn = document.getElementById("backBtn");
 
 function functionhanbackBtn() {
@@ -109,11 +126,11 @@ function functionhanbackBtn() {
 }
 
 backBtn.addEventListener("click", functionhanbackBtn);
+//-------------------------------------------------------------------------------
 
 
 
-
-
+//-------------------------------------------------------------------------------
 const addFolderBtn = document.getElementById("addFolderBtn");
 
 async function handleAddFolderButtonClick() {
@@ -126,27 +143,22 @@ async function handleAddFolderButtonClick() {
 
   if (lastClickedItem){
   let path = currentPath+'/'+lastClickedItem.name;
-
     await createFolderApi(path);
     modal.openModal("Папка создана");
     // Загружаем данные
     try {
       const newData = await FolderStructureService.getFolderStructure(currentPath);  // Используем currentPath
-      fileListElement.data = newData;
-      
-        
+      fileListElement.data = newData;   
     } catch (error) {
       console.error('Ошибка при загрузке данных:', error);
-    }
-    
-    
+    }   
 
   }
 }
 
 addFolderBtn.addEventListener("click", handleAddFolderButtonClick);
-
 //-------------------------------------------------------------------------------
+
 
 
 
@@ -154,7 +166,6 @@ addFolderBtn.addEventListener("click", handleAddFolderButtonClick);
 //-------------------------------------------------------------------------------
 // Блок вызова fileListElement.dataLoader
 //-------------------------------------------------------------------------------
-
 
 const createDataLoader = (path) => {
   return async () => {
@@ -171,22 +182,25 @@ fileListElement.dataLoader = createDataLoader(currentPath); // Создаем da
 
 
 //-------------------------------------------------------------------------------
-// Обработка обработчиков из fileListElement
+// Обработка обработчиков из зарегестрированных в компанентах
 //-------------------------------------------------------------------------------
 
-
+//fileListElement событие item-click
+//-------------------------------------------------------------------------------
 document.addEventListener('item-click', (event) => {
   const index = event.detail.index; // Получаем индекс из detail
   const data = fileListElement.data; // Получаем данные из компонента
   const item = data[index]; // Получаем элемент данных по индексу
 
   lastClickedItem = item; // Записываем во внешнюю переменную
- 
-
   console.log('Кликнули на элемент:', item);
  
 });
+//-------------------------------------------------------------------------------
 
+
+//fileListElement событие handleBackButtonClick
+//-------------------------------------------------------------------------------
 async function handleBackButtonClick(){
   let newPath = removeLastDirectoryFromPath(currentPath);
   updateTextInput(newPath,"#input");
@@ -213,18 +227,15 @@ document.addEventListener('item-double-click', async (event) => {
   const data = fileListElement.data;
   const item = data[index];
 
-// Проверяем, нужно ли выполнить handleBackButtonClick
-if (item && item.name === '...................') {
-  handleBackButtonClick(); // Выполняем функцию
-
-  // Прерываем дальнейшее выполнение функции-обработчика
-  return; // Выходим из обработчика события
-}
+  // Проверяем, нужно ли выполнить handleBackButtonClick
+  if (item && item.name === '...................') {
+    handleBackButtonClick(); // Выполняем функцию
+    return; // Выходим из обработчика события
+  }
   
   
   if (item && item.type.startsWith('folder') && item.name) {
     const folderName = item.name;
-
     // Формируем новый путь
     let newPath = currentPath;
     if (!currentPath.endsWith('/')) {
@@ -255,6 +266,8 @@ if (item && item.name === '...................') {
     
   }
 });
+//-------------------------------------------------------------------------------
+
 
 
 //-------------------------------------------------------------------------------

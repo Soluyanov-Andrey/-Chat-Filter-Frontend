@@ -86,6 +86,30 @@ import { gethData } from './fetchData.js';
       }
   
       const data = await response.json();
+
+      return data;
+    } catch (error) {
+      console.error('Ошибка при обработки deleteSelect', error);
+      throw error;
+    }
+  };
+
+  export const laveSelectApi = async (arraySelect) => {
+    const url = `${API_BASE_URL}/lave_selected`;
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(arraySelect)
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+  
+      const data = await response.json();
       
       return data;
     } catch (error) {

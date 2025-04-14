@@ -26,3 +26,19 @@
       background-color: #4682B4; /* Ещё более тёмный голубой фон */
       color: white; /* Белый текст при нажатии */
     }
+
+  /* Стили для disabled-кнопки */
+  .leftBlockTop button:disabled {
+    background-color: #E0E0E0; /* Серый фон */
+    color: #A0A0A0; /* Серый текст */
+    border-color: #C0C0C0; /* Серая рамка */
+    cursor: not-allowed; /* Курсор "недоступно" */
+    opacity: 0.7; /* Лёгкая прозрачность */
+    /* Отключаем hover- и active-эффекты */
+  }
+    .leftBlockTop button:disabled:hover,
+    .leftBlockTop button:disabled:active {
+      background-color: #E0E0E0; /* Оставляем тот же цвет */
+      color: #A0A0A0;
+    }
+    
