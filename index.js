@@ -268,8 +268,123 @@ fileListElement.dataLoader = createDataLoader(currentPath); // Создаем da
 //-------------------------------------------------------------------------------
 
 
-//fileListElement событие handleBackButtonClick
-//-------------------------------------------------------------------------------
+
+
+
+//fileListElement событие item-double-click 
+/**-------------------------------------------------------------------------------
+ * Обработчик события двойного клика на элементе списка.
+ * Определяет тип элемента (папка, "назад" или другой) и выполняет соответствующее действие.
+ * @param {Event} event - Объект события двойного клика. Содержит информацию о событии,
+ *                        включая индекс элемента, на котором произошел клик.
+ */
+document.addEventListener('item-double-click', async (event) => {
+  const index = event.detail.index; // Индекс элемента, на котором произошел двойной клик (например: 11).
+  const data = fileListElement.data; // Массив данных, отображаемых в списке (например: [{name: ' sh скрипты', type: 'folder-'}, {name: '7zip', type: 'folder-'}, {name: 'UFW сетевой экран', type: 'folder-'}]).
+  const item = data[index]; // Объект данных, соответствующий элементу, на котором произошел двойной клик (например: {name: 'mysql', type: 'folder-'}).
+
+  if (!item) {
+    console.warn("Двойной клик на несуществующем элементе.");
+    return; // Прерываем выполнение, если item не существует.
+  }
+
+  switch (true) {
+    case isBackNavigationItem(item):
+      handleBackButtonClick(); // Выполняем переход назад, если это элемент навигации "назад".
+      break;
+    case isFolder(item):
+      await handleFolderDoubleClick(item); // Обрабатываем двойной клик на папке.
+      break;
+    default:
+      console.log("Двойной клик на элементе, который не является ни папкой, ни кнопкой 'назад'. Ничего не делаем.");
+      // Ничего не делаем, если это не папка и не кнопка "назад"
+      break;
+  }
+});
+  
+  /**
+   * Проверяет, является ли элемент элементом навигации "назад" ("...........").
+   * @param {object} item - Объект, представляющий элемент списка.
+   * @returns {boolean} - True, если это элемент "назад", иначе false.
+   */
+  function isBackNavigationItem(item) {
+    
+    
+    return item && item.name === '...................';
+  }
+  
+
+
+  /**
+   * Проверяет, является ли элемент папкой.
+   * @param {object} item - Объект, представляющий элемент списка.
+   * @returns {boolean} - True, если это папка, иначе false.
+   */
+  function isFolder(item) {
+    const isActuallyAFolder = item.type && item.type.startsWith('folder') && item.name;
+    console.log(!!isActuallyAFolder);
+    return !!isActuallyAFolder;
+  }
+  
+
+
+  /**
+   * Обрабатывает двойной клик на папке.
+   * @param {object} item - Объект, представляющий папку.
+   */
+  async function handleFolderDoubleClick(item) {
+    const folderName = item.name;
+    const newPath = constructNewPath(currentPath, folderName);
+  
+    currentPath = newPath; // Обновляем текущий путь
+    updateTextInput(newPath, "#input");
+    fileListElement.dataLoader = createDataLoader(currentPath);
+  
+    try {
+      const newData = await FolderStructureService.getFolderStructure(currentPath);
+      newData.unshift({ name: '...................', type: 'folder-' });
+      fileListElement.data = newData;
+      lastClickedItem = null;
+    } catch (error) {
+      console.error('Ошибка при загрузке данных:', error);
+    }
+  }
+  
+
+
+
+  /**
+   * Конструирует новый путь на основе текущего пути и имени папки.
+   * @param {string} currentPath - Текущий путь.
+   * @param {string} folderName - Имя папки.
+   * @returns {string} - Новый путь.
+   */
+  function constructNewPath(currentPath, folderName) {
+    let newPath = currentPath;
+    if (!currentPath.endsWith('/')) {
+      newPath += '/';
+    }
+    newPath += folderName;
+    return newPath;
+  }
+
+
+/**
+ * Обрабатывает нажатие кнопки "назад", осуществляя переход к предыдущей директории.
+ *
+ * Функция выполняет следующие действия:
+ * 1.  Удаляет последнюю директорию из текущего пути (`currentPath`).
+ * 2.  Обновляет текстовое поле в UI (`#input`) новым путем.
+ * 3.  Загружает структуру папок для нового пути с помощью `FolderStructureService`.
+ * 4.  Добавляет элемент "назад" ("...................") в начало списка, если новый путь не совпадает с путем сохранения (`savecurrentPath`).
+ * 5.  Обновляет данные в UI-элементе `fileListElement`, отображающем структуру папок.
+ * 6.  Обновляет `currentPath` новым путем.
+ * 7.  Сбрасывает `lastClickedItem` в `null`.
+ *
+ * @async
+ * @function handleBackButtonClick
+ * @throws {Error} Если происходит ошибка при загрузке структуры папок.
+ */
   async function handleBackButtonClick(){
     let newPath = removeLastDirectoryFromPath(currentPath);
     updateTextInput(newPath,"#input");
@@ -289,52 +404,6 @@ fileListElement.dataLoader = createDataLoader(currentPath); // Создаем da
       }
   
   }
-
-
-  document.addEventListener('item-double-click', async (event) => {
-    const index = event.detail.index;
-    const data = fileListElement.data;
-    const item = data[index];
-
-    // Проверяем, нужно ли выполнить handleBackButtonClick
-    if (item && item.name === '...................') {
-      handleBackButtonClick(); // Выполняем функцию
-      return; // Выходим из обработчика события
-    }
-    
-    
-    if (item && item.type.startsWith('folder') && item.name) {
-      const folderName = item.name;
-      // Формируем новый путь
-      let newPath = currentPath;
-      if (!currentPath.endsWith('/')) {
-        newPath += '/';
-      }
-      newPath += folderName;
-
-      // Обновляем currentPath
-      currentPath = newPath; // Обновляем текущий путь
-      updateTextInput(newPath,"#input");
-      // Обновляем dataLoader
-      fileListElement.dataLoader = createDataLoader(currentPath);
-
-      // Загружаем данные
-      try {
-
-        const newData = await FolderStructureService.getFolderStructure(currentPath);  // Используем currentPath
-        newData.unshift({ name: '...................', type: 'folder-' });
-        
-        //тут происходит вставка в элемент fileListElement
-        fileListElement.data = newData;
-        lastClickedItem = null;
-      } catch (error) {
-        console.error('Ошибка при загрузке данных:', error);
-      }
-    } else {
-      console.log('Двойной клик на файле:', item, index);
-      
-    }
-  });
 //-------------------------------------------------------------------------------
 
 
