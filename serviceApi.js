@@ -22,6 +22,8 @@ import { gethData } from './fetchData.js';
       }
     }
   };
+
+  
   //Создаем папку Document в указаной папки на сервере
   export const createFolderApi = async (path) => {
     const url = `${API_BASE_URL}/create-folder`;
@@ -46,10 +48,34 @@ import { gethData } from './fetchData.js';
     }
   };
 
-  //Сканируем документ и выбираем темы
+  //Сканируем документ и выбираем из него темы
   export const getScanApi = async () => {
    
     const url = `${API_BASE_URL}/scan`; // Добавляем path как query parameter
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json', // Можно опустить для GET запросов
+        },
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+  
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Ошибка при обработки getScanApi', error);
+      throw error;
+    }
+  };
+
+   //Сканируем начальный файл в папке document выбираем темы
+  export const openDocumentApi = async (path) => {
+   
+    const url = `${API_BASE_URL}/open-document?path=${encodedPath}`; // Добавляем path как query parameter
     try {
       const response = await fetch(url, {
         method: 'GET',

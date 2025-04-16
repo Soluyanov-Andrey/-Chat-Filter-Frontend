@@ -146,9 +146,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
       const result = await getScanApi();
 
-      if (result && result.receivedData) {
+      if (result && result.message) {
 
-        const receivedData = result.receivedData;
+        const receivedData = result.message;
         const newDataString = JSON.stringify(receivedData);
         checkboxList.setAttribute('data', newDataString);
 
