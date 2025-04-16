@@ -289,6 +289,11 @@ fileListElement.dataLoader = createDataLoader(currentPath); // Создаем da
     }
 
     switch (true) {
+
+      case isSelectDocument(item):
+        pageLoadString(); // Выполняем переход назад, если это элемент навигации "назад".
+        break;
+
       case isBackNavigationItem(item):
         handleBackButtonClick(); // Выполняем переход назад, если это элемент навигации "назад".
         break;
@@ -301,18 +306,61 @@ fileListElement.dataLoader = createDataLoader(currentPath); // Создаем da
         break;
     }
   });
-    
+
+
+    function isSelectDocument(item) {
+      return item && item.name === 'document';
+    }
+        function pageLoadString(item) {
+          console.log('нажата document');
+          
+        }
+
+
     /**
      * Проверяет, является ли элемент элементом навигации "назад" ("...........").
      * @param {object} item - Объект, представляющий элемент списка.
      * @returns {boolean} - True, если это элемент "назад", иначе false.
      */
     function isBackNavigationItem(item) {
-      
-      
       return item && item.name === '...................';
     }
-    
+
+        /**
+         * Обрабатывает нажатие кнопки "назад", осуществляя переход к предыдущей директории.
+         *
+         * Функция выполняет следующие действия:
+         * 1.  Удаляет последнюю директорию из текущего пути (`currentPath`).
+         * 2.  Обновляет текстовое поле в UI (`#input`) новым путем.
+         * 3.  Загружает структуру папок для нового пути с помощью `FolderStructureService`.
+         * 4.  Добавляет элемент "назад" ("...................") в начало списка, если новый путь не совпадает с путем сохранения (`savecurrentPath`).
+         * 5.  Обновляет данные в UI-элементе `fileListElement`, отображающем структуру папок.
+         * 6.  Обновляет `currentPath` новым путем.
+         * 7.  Сбрасывает `lastClickedItem` в `null`.
+         *
+         * @async
+         * @function handleBackButtonClick
+         * @throws {Error} Если происходит ошибка при загрузке структуры папок.
+         */
+          async function handleBackButtonClick(){
+            let newPath = removeLastDirectoryFromPath(currentPath);
+            updateTextInput(newPath,"#input");
+              // Загружаем данные
+              try {
+                const newData = await FolderStructureService.getFolderStructure(newPath);  // Используем currentPath
+                if( newPath != savecurrentPath) {
+                newData.unshift({ name: '...................', type: 'folder-' });
+                //тут происходит вставка в элемент fileListElement
+              }
+                fileListElement.data = newData;
+                currentPath =  newPath;
+                lastClickedItem = null;
+                  
+              } catch (error) {
+                console.error('Ошибка при загрузке данных:', error);
+              }
+          
+          }
 
 
     /**
@@ -326,84 +374,45 @@ fileListElement.dataLoader = createDataLoader(currentPath); // Создаем da
       return !!isActuallyAFolder;
     }
     
-
-
-    /**
-     * Обрабатывает двойной клик на папке.
-     * @param {object} item - Объект, представляющий папку.
-     */
-    async function handleFolderDoubleClick(item) {
-      const folderName = item.name;
-      const newPath = constructNewPath(currentPath, folderName);
-    
-      currentPath = newPath; // Обновляем текущий путь
-      updateTextInput(newPath, "#input");
-      fileListElement.dataLoader = createDataLoader(currentPath);
-    
-      try {
-        const newData = await FolderStructureService.getFolderStructure(currentPath);
-        newData.unshift({ name: '...................', type: 'folder-' });
-        fileListElement.data = newData;
-        lastClickedItem = null;
-      } catch (error) {
-        console.error('Ошибка при загрузке данных:', error);
-      }
-    }
-    
-
-
-
-    /**
-     * Конструирует новый путь на основе текущего пути и имени папки.
-     * @param {string} currentPath - Текущий путь.
-     * @param {string} folderName - Имя папки.
-     * @returns {string} - Новый путь.
-     */
-    function constructNewPath(currentPath, folderName) {
-      let newPath = currentPath;
-      if (!currentPath.endsWith('/')) {
-        newPath += '/';
-      }
-      newPath += folderName;
-      return newPath;
-    }
-
-
-  /**
-   * Обрабатывает нажатие кнопки "назад", осуществляя переход к предыдущей директории.
-   *
-   * Функция выполняет следующие действия:
-   * 1.  Удаляет последнюю директорию из текущего пути (`currentPath`).
-   * 2.  Обновляет текстовое поле в UI (`#input`) новым путем.
-   * 3.  Загружает структуру папок для нового пути с помощью `FolderStructureService`.
-   * 4.  Добавляет элемент "назад" ("...................") в начало списка, если новый путь не совпадает с путем сохранения (`savecurrentPath`).
-   * 5.  Обновляет данные в UI-элементе `fileListElement`, отображающем структуру папок.
-   * 6.  Обновляет `currentPath` новым путем.
-   * 7.  Сбрасывает `lastClickedItem` в `null`.
-   *
-   * @async
-   * @function handleBackButtonClick
-   * @throws {Error} Если происходит ошибка при загрузке структуры папок.
-   */
-    async function handleBackButtonClick(){
-      let newPath = removeLastDirectoryFromPath(currentPath);
-      updateTextInput(newPath,"#input");
-        // Загружаем данные
-        try {
-          const newData = await FolderStructureService.getFolderStructure(newPath);  // Используем currentPath
-          if( newPath != savecurrentPath) {
-          newData.unshift({ name: '...................', type: 'folder-' });
-          //тут происходит вставка в элемент fileListElement
-        }
-          fileListElement.data = newData;
-          currentPath =  newPath;
-          lastClickedItem = null;
-            
-        } catch (error) {
-          console.error('Ошибка при загрузке данных:', error);
+        /**
+         * Обрабатывает двойной клик на папке.
+         * @param {object} item - Объект, представляющий папку.
+         */
+        async function handleFolderDoubleClick(item) {
+          const folderName = item.name;
+          const newPath = constructNewPath(currentPath, folderName);
+        
+          currentPath = newPath; // Обновляем текущий путь
+          updateTextInput(newPath, "#input");
+          fileListElement.dataLoader = createDataLoader(currentPath);
+        
+          try {
+            const newData = await FolderStructureService.getFolderStructure(currentPath);
+            newData.unshift({ name: '...................', type: 'folder-' });
+            fileListElement.data = newData;
+            lastClickedItem = null;
+          } catch (error) {
+            console.error('Ошибка при загрузке данных:', error);
+          }
         }
     
-    }
+            /**
+             * Конструирует новый путь на основе текущего пути и имени папки.
+             * @param {string} currentPath - Текущий путь.
+             * @param {string} folderName - Имя папки.
+             * @returns {string} - Новый путь.
+             */
+            function constructNewPath(currentPath, folderName) {
+              let newPath = currentPath;
+              if (!currentPath.endsWith('/')) {
+                newPath += '/';
+              }
+              newPath += folderName;
+              return newPath;
+            }
+
+
+
 //-------------------------------------------------------------------------------
 
 

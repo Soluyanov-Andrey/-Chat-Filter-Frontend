@@ -71,7 +71,7 @@ import { gethData } from './fetchData.js';
   };
 
   export const deleteSelectApi = async (arraySelect) => {
-    const url = `${API_BASE_URL}/delete_select`;
+    const url = `${API_BASE_URL}/delete-select`;
     try {
       const response = await fetch(url, {
         method: 'POST',
@@ -95,7 +95,7 @@ import { gethData } from './fetchData.js';
   };
 
   export const laveSelectApi = async (arraySelect) => {
-    const url = `${API_BASE_URL}/lave_selected`;
+    const url = `${API_BASE_URL}/lave-selected`;
     try {
       const response = await fetch(url, {
         method: 'POST',
@@ -119,7 +119,7 @@ import { gethData } from './fetchData.js';
   };
 
   export const lookPageApi = async (arraySelect) => {
-    const url = `${API_BASE_URL}/lookPageBtn`;
+    const url = `${API_BASE_URL}/look-page`;
     try {
       const response = await fetch(url, {
         method: 'POST',
@@ -141,3 +141,6 @@ import { gethData } from './fetchData.js';
       throw error;
     }
   };
+
+  
+
