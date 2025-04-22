@@ -15,7 +15,7 @@ import { gethData } from './fetchData.js';
       const url = `${API_BASE_URL}/folder-structure?path=${encodedPath}`;
       try {
         const data = await gethData(url);
-        return data.receivedData.folders; // Преобразуем данные в нужный формат
+        return data.data.folders; // Преобразуем данные в нужный формат
       } catch (error) {
         console.error('Ошибка при получении структуры папок:', error);
         throw error;
@@ -74,8 +74,9 @@ import { gethData } from './fetchData.js';
 
    //Сканируем начальный файл в папке document выбираем темы
   export const openDocumentApi = async (path) => {
-   
-    const url = `${API_BASE_URL}/open-document?path=${encodedPath}`; // Добавляем path как query parameter
+    
+    
+    const url = `${API_BASE_URL}/open-document?path=${path}`; // Добавляем path как query parameter
     try {
       const response = await fetch(url, {
         method: 'GET',

@@ -15,6 +15,7 @@ import {
   getScanApi, 
   laveSelectApi,
   lookPageApi,
+  openDocumentApi
 } from './serviceApi.js';
 
 
@@ -23,8 +24,6 @@ import {
   updateTextInput 
 } from './additionalFunctions.js'
 
-
-import { gethData, postData } from './fetchData.js'
 import makePanelResizable from './limiterMovement.js'
 
 
@@ -146,9 +145,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
       const result = await getScanApi();
 
-      if (result && result.message) {
+      if (result && result.data) {
 
-        const receivedData = result.message;
+        const receivedData = result.data;
         const newDataString = JSON.stringify(receivedData);
         checkboxList.setAttribute('data', newDataString);
 
@@ -311,9 +310,18 @@ fileListElement.dataLoader = createDataLoader(currentPath); // Создаем da
     function isSelectDocument(item) {
       return item && item.name === 'document';
     }
-        function pageLoadString(item) {
+        async function pageLoadString() {
+   
+          console.log('currentPath--',currentPath);
           console.log('нажата document');
-          
+          try {
+            const newData = await openDocumentApi(currentPath);
+            newData.data.unshift({ name: '...................', type: 'folder-' });
+            fileListElement.data = newData.data;
+            console.log('newData-',newData);
+          } catch (error) {
+            console.error('Ошибка при загрузке данных:', error);
+          }
         }
 
 
@@ -350,8 +358,10 @@ fileListElement.dataLoader = createDataLoader(currentPath); // Создаем da
                 const newData = await FolderStructureService.getFolderStructure(newPath);  // Используем currentPath
                 if( newPath != savecurrentPath) {
                 newData.unshift({ name: '...................', type: 'folder-' });
+                
                 //тут происходит вставка в элемент fileListElement
               }
+               
                 fileListElement.data = newData;
                 currentPath =  newPath;
                 lastClickedItem = null;
@@ -390,6 +400,8 @@ fileListElement.dataLoader = createDataLoader(currentPath); // Создаем da
             const newData = await FolderStructureService.getFolderStructure(currentPath);
             newData.unshift({ name: '...................', type: 'folder-' });
             fileListElement.data = newData;
+
+            console.log('newData-',newData);
             lastClickedItem = null;
           } catch (error) {
             console.error('Ошибка при загрузке данных:', error);
