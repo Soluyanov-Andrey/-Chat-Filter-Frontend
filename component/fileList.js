@@ -196,7 +196,7 @@ class FileList extends HTMLElement {
             imageUrl = './images/check-mark.jpg';
             altText = 'Папка';
           } else {
-            imageUrl = './images/file.png';
+            imageUrl = './images/books.png';
             altText = 'Файл';
           }
 

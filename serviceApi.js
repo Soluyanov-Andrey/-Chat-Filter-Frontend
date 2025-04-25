@@ -97,6 +97,32 @@ import { gethData } from './fetchData.js';
     }
   };
 
+  export const openThemesApi = async (path, index) => {
+    
+    
+    const url = `${API_BASE_URL}/open-themes?path=${path}&index=${index}`; // Добавляем path как query parameter
+    try {
+      console.log('index-',index);
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json', // Можно опустить для GET запросов
+        },
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+  
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Ошибка при обработки openThemesApi', error);
+      throw error;
+    }
+  };
+
   export const deleteSelectApi = async (arraySelect) => {
     const url = `${API_BASE_URL}/delete-select`;
     try {

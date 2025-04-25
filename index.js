@@ -15,7 +15,8 @@ import {
   getScanApi, 
   laveSelectApi,
   lookPageApi,
-  openDocumentApi
+  openDocumentApi,
+  openThemesApi
 } from './serviceApi.js';
 
 
@@ -30,7 +31,7 @@ import makePanelResizable from './limiterMovement.js'
 document.addEventListener('DOMContentLoaded', function() {
 
   let lastClickedItem = null;  // Внешняя переменная для item
-
+  let depth = ''; // Значение может быть трех типов пустое '','root','themes'
 
   let currentPath = "/media/andrey/Рабочий/flash/linux/manul"; // Объявляем переменную
   let savecurrentPath = currentPath;
@@ -261,7 +262,7 @@ fileListElement.dataLoader = createDataLoader(currentPath); // Создаем da
       const item = data[index]; // Получаем элемент данных по индексу
 
       lastClickedItem = item; // Записываем во внешнюю переменную
-      console.log('Кликнули на элемент:', item);
+      console.log('Кликнули на элемент:', index);
     
     });
   //-------------------------------------------------------------------------------
@@ -289,15 +290,29 @@ fileListElement.dataLoader = createDataLoader(currentPath); // Создаем da
 
     switch (true) {
 
-      case isSelectDocument(item):
-        pageLoadString(); // Выполняем переход назад, если это элемент навигации "назад".
+      case presseBackThemes(item):
+        reactionBackThemes();
         break;
 
-      case isBackNavigationItem(item):
-        handleBackButtonClick(); // Выполняем переход назад, если это элемент навигации "назад".
+      case pressedOpenThemes(item):
+        reactionOpenThemes(index);
         break;
-      case isFolder(item):
-        await handleFolderDoubleClick(item); // Обрабатываем двойной клик на папке.
+
+      // case isSelectRootBack(item):
+      //   handleBackButtonClick();  // Выполняем переход назад, если смотрели папку document файл root
+      //   break;
+
+      case pressedSelectDocument(item):
+        reactionOpenDocument(); // Выполняем чтение document файл root
+
+        break;
+      
+      case pressedBackNavigationItem(item):
+        reactionBackNavigation(); // Выполняем переход назад, если это элемент навигации "назад".
+        break;
+
+      case  pressedFolder(item):
+        await reactionFolderDoubleClick(item); // Обрабатываем двойной клик на папке.
         break;
       default:
         console.log("Двойной клик на элементе, который не является ни папкой, ни кнопкой 'назад'. Ничего не делаем.");
@@ -305,23 +320,82 @@ fileListElement.dataLoader = createDataLoader(currentPath); // Создаем da
         break;
     }
   });
+    function presseBackThemes(item) {
+      return depth === 'themes' && item.name === '...................';
+    }
 
+      function removeLastPathPart(path) {
+        // Удаляем слэш в конце пути, если он есть
+        path = path.endsWith('/') ? path.slice(0, -1) : path;
+        // Разделяем путь по слэшам и убираем последнюю часть
+        const parts = path.split('/');
+        parts.pop();
+        // Собираем путь обратно
+        return parts.join('/');
+      }
 
-    function isSelectDocument(item) {
+      async function reactionBackThemes(index) {
+        console.log('presseBackThemes(--');
+        try {
+          // let currentPathTemp = removeLastPathPart(currentPath);
+          // console.log('currentPath--',currentPath);
+          const newData = await openDocumentApi(currentPath);
+          newData.data.unshift({ name: '...................', type: 'folder-' });
+          fileListElement.data = newData.data;
+          depth = 'root';
+        } catch (error) {
+          console.error('Ошибка при загрузке данных:', error);
+        }
+
+        console.log('нажата openBackThemes');
+        
+
+      }
+    
+    function pressedOpenThemes(item) {
+      return depth === 'root' && item.name != '...................';
+    }
+
+      async function reactionOpenThemes(index) {
+        console.log('pressedOpenThemes--');
+        try {
+          depth = 'themes';
+          
+          const newData = await openThemesApi(currentPath, index);
+          newData.data.unshift({ name: '...................', type: 'folder-' });
+          fileListElement.data = newData.data;
+        } catch (error) {
+          console.error('Ошибка при загрузке данных:', error);
+        }
+
+      }
+
+    function isSelectRootBack(item) {
+      return depth === 'root' && item.name === '...................';
+    }
+     
+
+    function pressedSelectDocument(item) {
       return item && item.name === 'document';
     }
-        async function pageLoadString() {
-   
-          console.log('currentPath--',currentPath);
-          console.log('нажата document');
+        async function reactionOpenDocument() {
+          console.log('pressedSelectDocument--');
+          if( depth === ''){
+          depth = 'root';
+          currentPath = currentPath + '/document';
           try {
             const newData = await openDocumentApi(currentPath);
             newData.data.unshift({ name: '...................', type: 'folder-' });
             fileListElement.data = newData.data;
-            console.log('newData-',newData);
+            
+            updateTextInput(currentPath, "#input");
+
           } catch (error) {
             console.error('Ошибка при загрузке данных:', error);
           }
+
+          }
+         
         }
 
 
@@ -330,7 +404,7 @@ fileListElement.dataLoader = createDataLoader(currentPath); // Создаем da
      * @param {object} item - Объект, представляющий элемент списка.
      * @returns {boolean} - True, если это элемент "назад", иначе false.
      */
-    function isBackNavigationItem(item) {
+    function pressedBackNavigationItem(item) {
       return item && item.name === '...................';
     }
 
@@ -350,7 +424,9 @@ fileListElement.dataLoader = createDataLoader(currentPath); // Создаем da
          * @function handleBackButtonClick
          * @throws {Error} Если происходит ошибка при загрузке структуры папок.
          */
-          async function handleBackButtonClick(){
+          async function reactionBackNavigation(){
+            console.log('pressedBackNavigationItem--');
+            depth = '';
             let newPath = removeLastDirectoryFromPath(currentPath);
             updateTextInput(newPath,"#input");
               // Загружаем данные
@@ -378,7 +454,7 @@ fileListElement.dataLoader = createDataLoader(currentPath); // Создаем da
      * @param {object} item - Объект, представляющий элемент списка.
      * @returns {boolean} - True, если это папка, иначе false.
      */
-    function isFolder(item) {
+    function  pressedFolder(item) {
       const isActuallyAFolder = item.type && item.type.startsWith('folder') && item.name;
       console.log(!!isActuallyAFolder);
       return !!isActuallyAFolder;
@@ -388,7 +464,8 @@ fileListElement.dataLoader = createDataLoader(currentPath); // Создаем da
          * Обрабатывает двойной клик на папке.
          * @param {object} item - Объект, представляющий папку.
          */
-        async function handleFolderDoubleClick(item) {
+        async function reactionFolderDoubleClick(item) {
+          console.log('pressedFolder--');
           const folderName = item.name;
           const newPath = constructNewPath(currentPath, folderName);
         
@@ -401,7 +478,7 @@ fileListElement.dataLoader = createDataLoader(currentPath); // Создаем da
             newData.unshift({ name: '...................', type: 'folder-' });
             fileListElement.data = newData;
 
-            console.log('newData-',newData);
+           
             lastClickedItem = null;
           } catch (error) {
             console.error('Ошибка при загрузке данных:', error);
