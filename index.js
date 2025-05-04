@@ -334,7 +334,6 @@ fileListElement.dataLoader = createDataLoader(currentPath); // Создаем da
 
       case pressedSelectDocument(item):
         reactionOpenDocument(); // Выполняем чтение document файл root
-
         break;
       
       case pressedBackNavigationItem(item):

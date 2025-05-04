@@ -11,13 +11,14 @@ import { gethData } from './fetchData.js';
 
   export const FolderStructureService = {
     getFolderStructure: async (path) => {
+      console.log('ApiFolderStructureService');
       const encodedPath = encodeURIComponent(path);
       const url = `${API_BASE_URL}/folder-structure?path=${encodedPath}`;
       try {
         const data = await gethData(url);
-        console.log(data);
-        
-        return data.folders; // Преобразуем данные в нужный формат
+    
+       
+        return data.data.folders; // Преобразуем данные в нужный формат
       } catch (error) {
         console.error('Ошибка при получении структуры папок:', error);
         throw error;
@@ -28,6 +29,7 @@ import { gethData } from './fetchData.js';
   
   //Создаем папку Document в указаной папки на сервере
   export const createFolderApi = async (path) => {
+    console.log('createFolderApi');
     const url = `${API_BASE_URL}/create-folder`;
     try {
       const response = await fetch(url, {
@@ -52,7 +54,7 @@ import { gethData } from './fetchData.js';
 
   //Сканируем документ и выбираем из него темы
   export const getScanApi = async () => {
-   
+    console.log('getScanApi');
     const url = `${API_BASE_URL}/scan`; // Добавляем path как query parameter
     try {
       const response = await fetch(url, {
@@ -76,7 +78,7 @@ import { gethData } from './fetchData.js';
 
    //Сканируем начальный файл в папке document выбираем темы
   export const openDocumentApi = async (path) => {
-    
+    console.log('openDocumentApi');
     
     const url = `${API_BASE_URL}/open-document?path=${path}`; // Добавляем path как query parameter
     try {
@@ -92,6 +94,8 @@ import { gethData } from './fetchData.js';
       }
   
       const data = await response.json();
+      console.log(data);
+      
       return data;
     } catch (error) {
       console.error('Ошибка при обработки getScanApi', error);
@@ -100,7 +104,7 @@ import { gethData } from './fetchData.js';
   };
 
   export const openThemesApi = async (path, index) => {
-    
+    console.log('openThemesApi');
     
     const url = `${API_BASE_URL}/open-themes?path=${path}&index=${index}`; // Добавляем path как query parameter
     try {
@@ -126,6 +130,8 @@ import { gethData } from './fetchData.js';
   };
 
   export const deleteSelectApi = async (arraySelect) => {
+    console.log('deleteSelectApi');
+
     const url = `${API_BASE_URL}/delete-select`;
     try {
       const response = await fetch(url, {
@@ -150,6 +156,8 @@ import { gethData } from './fetchData.js';
   };
 
   export const laveSelectApi = async (arraySelect) => {
+    console.log('laveSelectApi');
+
     const url = `${API_BASE_URL}/lave-selected`;
     try {
       const response = await fetch(url, {
@@ -174,6 +182,7 @@ import { gethData } from './fetchData.js';
   };
 
   export const lookPageApi = async (arraySelect) => {
+    console.log('lookPageApi');
     const url = `${API_BASE_URL}/look-page`;
     try {
       const response = await fetch(url, {
@@ -198,6 +207,7 @@ import { gethData } from './fetchData.js';
   };
 
   export const createPageApi = async (path, indexTheme) => {
+    console.log('createPageApi');
     const url = `${API_BASE_URL}/create-page`;
     try {
 
