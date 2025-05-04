@@ -15,7 +15,9 @@ import { gethData } from './fetchData.js';
       const url = `${API_BASE_URL}/folder-structure?path=${encodedPath}`;
       try {
         const data = await gethData(url);
-        return data.data.folders; // Преобразуем данные в нужный формат
+        console.log(data);
+        
+        return data.folders; // Преобразуем данные в нужный формат
       } catch (error) {
         console.error('Ошибка при получении структуры папок:', error);
         throw error;
@@ -195,5 +197,34 @@ import { gethData } from './fetchData.js';
     }
   };
 
-  
+  export const createPageApi = async (path, indexTheme) => {
+    const url = `${API_BASE_URL}/create-page`;
+    try {
 
+      const requestBody = {
+        path: path,
+        indexTheme: indexTheme
+      };
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestBody)
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+  
+      const data = await response.json();
+      
+      return data;
+    } catch (error) {
+      console.error('Ошибка при обработки createPageApi', error);
+      throw error;
+    }
+  };
+  
+  

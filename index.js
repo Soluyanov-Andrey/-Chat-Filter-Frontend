@@ -16,7 +16,8 @@ import {
   laveSelectApi,
   lookPageApi,
   openDocumentApi,
-  openThemesApi
+  openThemesApi,
+  createPageApi
 } from './serviceApi.js';
 
 
@@ -36,6 +37,11 @@ document.addEventListener('DOMContentLoaded', function() {
   let currentPath = "/media/andrey/Рабочий/flash/linux/manul"; // Объявляем переменную
   let savecurrentPath = currentPath;
 
+
+  let index;  // Индекс элемента, на котором произошел двойной клик (например: 11).
+  let data;   // Массив данных, отображаемых в списке (например: [{name: ' sh скрипты', type: 'folder-'}, {name: '7zip', type: 'folder-'}, {name: 'UFW сетевой экран', type: 'folder-'}]).
+  let item;   // Объект данных, соответствующий элементу, на котором произошел двойной клик (например: {name: 'mysql', type: 'folder-'}).
+
   const fileListElement = document.getElementById('my-file-list');
   const modal = document.getElementById('message-modal');
   const checkboxList = document.getElementById('checkbox-list');
@@ -53,6 +59,30 @@ document.addEventListener('DOMContentLoaded', function() {
 //-------------------------------------------------------------------------------
 // блоки кода событий на кнопках
 //-------------------------------------------------------------------------------
+
+  //------------------------------------------------------------------------------
+
+   const createPageBtn = document.getElementById('createPageBtn');
+
+   async function createPageBtnFn(){
+
+    const result = await createPageApi(currentPath, index);
+    if (result.message === 'create-page')
+      try {
+        
+      } catch (error) {
+        console.error("Ошибка при вызове getSelected в ", error);
+      }
+      return;
+    
+      
+     
+    }
+
+    createPageBtn.addEventListener("click",createPageBtnFn);
+  //------------------------------------------------------------------------------
+
+
 
   //-------------------------------------------------------------------------------
     const lookPageBtn = document.getElementById('lookPageBtn');
@@ -279,9 +309,9 @@ fileListElement.dataLoader = createDataLoader(currentPath); // Создаем da
    *                        включая индекс элемента, на котором произошел клик.
    */
   document.addEventListener('item-double-click', async (event) => {
-    const index = event.detail.index; // Индекс элемента, на котором произошел двойной клик (например: 11).
-    const data = fileListElement.data; // Массив данных, отображаемых в списке (например: [{name: ' sh скрипты', type: 'folder-'}, {name: '7zip', type: 'folder-'}, {name: 'UFW сетевой экран', type: 'folder-'}]).
-    const item = data[index]; // Объект данных, соответствующий элементу, на котором произошел двойной клик (например: {name: 'mysql', type: 'folder-'}).
+     index = event.detail.index; // Индекс элемента, на котором произошел двойной клик (например: 11).
+     data = fileListElement.data; // Массив данных, отображаемых в списке (например: [{name: ' sh скрипты', type: 'folder-'}, {name: '7zip', type: 'folder-'}, {name: 'UFW сетевой экран', type: 'folder-'}]).
+     item = data[index]; // Объект данных, соответствующий элементу, на котором произошел двойной клик (например: {name: 'mysql', type: 'folder-'}).
 
     if (!item) {
       console.warn("Двойной клик на несуществующем элементе.");
@@ -324,15 +354,15 @@ fileListElement.dataLoader = createDataLoader(currentPath); // Создаем da
       return depth === 'themes' && item.name === '...................';
     }
 
-      function removeLastPathPart(path) {
-        // Удаляем слэш в конце пути, если он есть
-        path = path.endsWith('/') ? path.slice(0, -1) : path;
-        // Разделяем путь по слэшам и убираем последнюю часть
-        const parts = path.split('/');
-        parts.pop();
-        // Собираем путь обратно
-        return parts.join('/');
-      }
+      // function removeLastPathPart(path) {
+      //   // Удаляем слэш в конце пути, если он есть
+      //   path = path.endsWith('/') ? path.slice(0, -1) : path;
+      //   // Разделяем путь по слэшам и убираем последнюю часть
+      //   const parts = path.split('/');
+      //   parts.pop();
+      //   // Собираем путь обратно
+      //   return parts.join('/');
+      // }
 
       async function reactionBackThemes(index) {
         console.log('presseBackThemes(--');
@@ -378,6 +408,7 @@ fileListElement.dataLoader = createDataLoader(currentPath); // Создаем da
     function pressedSelectDocument(item) {
       return item && item.name === 'document';
     }
+
         async function reactionOpenDocument() {
           console.log('pressedSelectDocument--');
           if( depth === ''){
@@ -478,7 +509,7 @@ fileListElement.dataLoader = createDataLoader(currentPath); // Создаем da
             newData.unshift({ name: '...................', type: 'folder-' });
             fileListElement.data = newData;
 
-           
+            
             lastClickedItem = null;
           } catch (error) {
             console.error('Ошибка при загрузке данных:', error);
