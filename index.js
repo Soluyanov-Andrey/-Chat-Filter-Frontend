@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function() {
   let lastClickedItem = null;  // Внешняя переменная для item
   let depth = ''; // Значение может быть трех типов пустое '','root','themes'
 
-  let currentPath = "/media/andrey/Рабочий/flash/linux/manul"; // Объявляем переменную
+  let currentPath = "/media/andrey/project/flash/linux/manul"; // Объявляем переменную
   let savecurrentPath = currentPath;
 
 
@@ -65,8 +65,12 @@ document.addEventListener('DOMContentLoaded', function() {
    const createPageBtn = document.getElementById('createPageBtn');
 
    async function createPageBtnFn(){
+   
 
     const result = await createPageApi(currentPath, index);
+
+    
+
     if (result.message === 'create-page')
       try {
         
@@ -86,6 +90,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
   //-------------------------------------------------------------------------------
     const lookPageBtn = document.getElementById('lookPageBtn');
+    
+
     const rightPanel = document.querySelector('.right-panel'); // Получаем ссылку на right-panel по классу
 
 
@@ -100,6 +106,10 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
           checkboxList.classList.toggle('hidden'); //Скрываем компанент classList меняя стиль 
           lookPageBtn.disabled = true; //Скрываем кнопку Смотрим страницы добавляя атрибут  disabled к html <button id="lookPageBtn" disabled>
+          deleteSelectBtn.disabled = true;
+          laveSelectBtn.disabled = true;
+
+
           backBtn.disabled = false; //Отображаем кнопку вернутся назад
     
           pageLoaderInstance = document.createElement('page-loader');
@@ -125,7 +135,9 @@ document.addEventListener('DOMContentLoaded', function() {
       const result = await deleteSelectApi(arraySelect);
       
       if (result.message === 'Элементы успешно удалены') {
-        lookPageBtn.disabled = true;
+         lookPageBtn.disabled = true;
+         deleteSelectBtn.disabled = true;
+         laveSelectBtn.disabled = true;
         (async () => {
           try {
             const result = await getSelected();
@@ -152,6 +164,10 @@ document.addEventListener('DOMContentLoaded', function() {
       
       const result = await laveSelectApi(arraySelect);
       if (result.message === 'Элементы успешно удалены') {
+
+          lookPageBtn.disabled = true; //Скрываем кнопку Смотрим страницы добавляя атрибут  disabled к html <button id="lookPageBtn" disabled>
+          deleteSelectBtn.disabled = true;
+          laveSelectBtn.disabled = true;
         (async () => {
           try {
             const result = await getSelected();
@@ -172,8 +188,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
   //-------------------------------------------------------------------------------
     const scanBtn = document.getElementById("scanBtn");
-    async function getSelected() {
 
+    async function getSelected() {
       const result = await getScanApi();
 
       if (result && result.data) {
@@ -192,6 +208,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       
     }
+
     scanBtn.addEventListener("click", getSelected);
   //-------------------------------------------------------------------------------
 
@@ -203,8 +220,11 @@ document.addEventListener('DOMContentLoaded', function() {
       pageLoaderInstance.remove(); //Удаляем компанент pageLoaderInstance
       checkboxList.classList.toggle('hidden', false);//Показываем classList меняя стиль
       lookPageBtn.disabled = false; //Показываем кнопку Смотрим страницы убирая атрибут  disabled к html <button id="lookPageBtn">
-      backBtn.disabled = true; //Отображаем кнопку вернутся назад
+      deleteSelectBtn.disabled = false;
+      laveSelectBtn.disabled = false;
 
+      backBtn.disabled = true; //Отображаем кнопку вернутся назад
+      
     }
 
     backBtn.addEventListener("click", functionhanbackBtn);
@@ -277,6 +297,8 @@ fileListElement.dataLoader = createDataLoader(currentPath); // Создаем da
       : true; // отключаем, если это не массив
 
       lookPageBtn.disabled = shouldDisable;
+      deleteSelectBtn.disabled = shouldDisable;
+      laveSelectBtn.disabled = shouldDisable;
 
       const selectedIndices = event.detail; // Теперь detail — это сам массив
       console.log('Выбранные индексы:', selectedIndices);
@@ -317,14 +339,20 @@ fileListElement.dataLoader = createDataLoader(currentPath); // Создаем da
       console.warn("Двойной клик на несуществующем элементе.");
       return; // Прерываем выполнение, если item не существует.
     }
-
+      console.log('index',index);
+      console.log('data',data);
+      console.log('item',item);
     switch (true) {
 
       case presseBackThemes(item):
+        
+        createPageBtn.disabled = true;
+
         reactionBackThemes();
         break;
 
       case pressedOpenThemes(item):
+        getSelected();
         reactionOpenThemes(index);
         break;
 
@@ -337,12 +365,14 @@ fileListElement.dataLoader = createDataLoader(currentPath); // Создаем da
         break;
       
       case pressedBackNavigationItem(item):
+        
         reactionBackNavigation(); // Выполняем переход назад, если это элемент навигации "назад".
         break;
 
       case  pressedFolder(item):
         await reactionFolderDoubleClick(item); // Обрабатываем двойной клик на папке.
         break;
+
       default:
         console.log("Двойной клик на элементе, который не является ни папкой, ни кнопкой 'назад'. Ничего не делаем.");
         // Ничего не делаем, если это не папка и не кнопка "назад"
@@ -381,6 +411,8 @@ fileListElement.dataLoader = createDataLoader(currentPath); // Создаем da
 
       }
     
+    
+    
     function pressedOpenThemes(item) {
       return depth === 'root' && item.name != '...................';
     }
@@ -389,7 +421,7 @@ fileListElement.dataLoader = createDataLoader(currentPath); // Создаем da
         console.log('pressedOpenThemes--');
         try {
           depth = 'themes';
-          
+          createPageBtn.disabled = false; 
           const newData = await openThemesApi(currentPath, index);
           newData.data.unshift({ name: '...................', type: 'folder-' });
           fileListElement.data = newData.data;
@@ -428,7 +460,7 @@ fileListElement.dataLoader = createDataLoader(currentPath); // Создаем da
          
         }
 
-
+    
     /**
      * Проверяет, является ли элемент элементом навигации "назад" ("...........").
      * @param {object} item - Объект, представляющий элемент списка.

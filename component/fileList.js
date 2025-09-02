@@ -98,7 +98,7 @@ class FileList extends HTMLElement {
 
       const detail = { index: index };
       this.dispatchEvent(new CustomEvent('item-click', {
-        detail: detail,
+        detail: detail ,
         bubbles: true,
         composed: true
       }));
