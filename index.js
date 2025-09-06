@@ -7,7 +7,6 @@ import { MessageModal } from './component/customModal.js';
 import { CheckboxList } from './component/checkboxList.js'; 
 import { PageLoader } from './component/pageLoader.js'; 
 
-
 import {
   FolderStructureService,
   createFolderApi,
@@ -231,6 +230,20 @@ document.addEventListener('DOMContentLoaded', function() {
   //-------------------------------------------------------------------------------
 
 
+  //-------------------------------------------------------------------------------
+    const buttonTopic = document.getElementById("addTopicBtn");
+
+    buttonTopic.disabled = true;
+
+    function buttonFunctionTopic() {
+
+     
+    }
+
+    backBtn.addEventListener("click", buttonFunctionTopic);
+  //-------------------------------------------------------------------------------
+
+ 
 
   //-------------------------------------------------------------------------------
     const addFolderBtn = document.getElementById("addFolderBtn");
@@ -361,11 +374,12 @@ fileListElement.dataLoader = createDataLoader(currentPath); // Создаем da
       //   break;
 
       case pressedSelectDocument(item):
+        buttonTopic.disabled = false;
         reactionOpenDocument(); // Выполняем чтение document файл root
         break;
       
       case pressedBackNavigationItem(item):
-        
+          
         reactionBackNavigation(); // Выполняем переход назад, если это элемент навигации "назад".
         break;
 
@@ -379,6 +393,8 @@ fileListElement.dataLoader = createDataLoader(currentPath); // Создаем da
         break;
     }
   });
+
+  
     function presseBackThemes(item) {
       return depth === 'themes' && item.name === '...................';
     }
@@ -396,12 +412,14 @@ fileListElement.dataLoader = createDataLoader(currentPath); // Создаем da
       async function reactionBackThemes(index) {
         console.log('presseBackThemes(--');
         try {
+
           // let currentPathTemp = removeLastPathPart(currentPath);
           // console.log('currentPath--',currentPath);
           const newData = await openDocumentApi(currentPath);
           newData.data.unshift({ name: '...................', type: 'folder-' });
           fileListElement.data = newData.data;
           depth = 'root';
+          
         } catch (error) {
           console.error('Ошибка при загрузке данных:', error);
         }
@@ -487,6 +505,7 @@ fileListElement.dataLoader = createDataLoader(currentPath); // Создаем da
          * @throws {Error} Если происходит ошибка при загрузке структуры папок.
          */
           async function reactionBackNavigation(){
+            buttonTopic.disabled = true;
             console.log('pressedBackNavigationItem--');
             depth = '';
             let newPath = removeLastDirectoryFromPath(currentPath);

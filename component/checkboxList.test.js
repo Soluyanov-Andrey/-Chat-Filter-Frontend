@@ -1,7 +1,7 @@
 /**
  * @jest-environment jsdom
  */
-import { CheckboxList } from './checkboxList'; // Предполагается, что ваш компонент в этом файле
+import { CheckboxList } from './checkboxList'; // Компанент в этом файле
 import '@testing-library/jest-dom'; // для расширенных проверок DOM
 
 describe('CheckboxList Component Tests', () => {
