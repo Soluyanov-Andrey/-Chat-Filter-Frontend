@@ -6,6 +6,7 @@ import { FileList } from './component/fileList.js';
 import { MessageModal } from './component/customModal.js'; 
 import { CheckboxList } from './component/checkboxList.js'; 
 import { PageLoader } from './component/pageLoader.js'; 
+import { DialogForm } from './component/dialogForm.js'; 
 
 import {
   FolderStructureService,
@@ -16,7 +17,8 @@ import {
   lookPageApi,
   openDocumentApi,
   openThemesApi,
-  createPageApi
+  createPageApi,
+  createTopicApi
 } from './serviceApi.js';
 
 
@@ -72,7 +74,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (result.message === 'create-page')
       try {
-        
+       updateFileList();
       } catch (error) {
         console.error("Ошибка при вызове getSelected в ", error);
       }
@@ -232,15 +234,44 @@ document.addEventListener('DOMContentLoaded', function() {
 
   //-------------------------------------------------------------------------------
     const buttonTopic = document.getElementById("addTopicBtn");
+    const dialog = document.getElementById('myDialog');
 
     buttonTopic.disabled = true;
 
-    function buttonFunctionTopic() {
 
-     
-    }
+    
 
-    backBtn.addEventListener("click", buttonFunctionTopic);
+    // Добавляем слушатель на кнопку, которая открывает диалог
+    buttonTopic.addEventListener('click', () => {
+    dialog.show(); // Вызываем метод show() нашего компонента
+    });
+
+      // Слушаем кастомное событие 'dialog-submit', которое отправляет компонент
+    dialog.addEventListener('dialog-submit', async (event) => {
+      try {
+          const submittedValue = event.detail.value;
+          console.log('Получено отправленное значение:', submittedValue);
+          
+          const data = await createTopicApi(currentPath, submittedValue);
+          
+          // Обработка полученных данных
+          console.log('Данные получены:', data);
+          
+          // Дальнейшая логика обработки data
+          if (data.message) {
+              // Действия при успешном выполнении
+              console.log('Данные получены1:', data);
+              updateFileList();
+          } else {
+              // Обработка ошибок
+              showError(data.message);
+          }
+      } catch (error) {
+          console.error('Ошибка при выполнении запроса:', error);
+          showError('Произошла ошибка при создании темы');
+      }
+});
+
   //-------------------------------------------------------------------------------
 
  
@@ -359,12 +390,13 @@ fileListElement.dataLoader = createDataLoader(currentPath); // Создаем da
 
       case presseBackThemes(item):
         
-        createPageBtn.disabled = true;
+        
 
         reactionBackThemes();
         break;
 
       case pressedOpenThemes(item):
+        
         getSelected();
         reactionOpenThemes(index);
         break;
@@ -374,12 +406,13 @@ fileListElement.dataLoader = createDataLoader(currentPath); // Создаем da
       //   break;
 
       case pressedSelectDocument(item):
-        buttonTopic.disabled = false;
+      
         reactionOpenDocument(); // Выполняем чтение document файл root
         break;
       
       case pressedBackNavigationItem(item):
           
+
         reactionBackNavigation(); // Выполняем переход назад, если это элемент навигации "назад".
         break;
 
@@ -410,6 +443,8 @@ fileListElement.dataLoader = createDataLoader(currentPath); // Создаем da
       // }
 
       async function reactionBackThemes(index) {
+        buttonTopic.disabled = false;
+        createPageBtn.disabled = true;
         console.log('presseBackThemes(--');
         try {
 
@@ -437,6 +472,7 @@ fileListElement.dataLoader = createDataLoader(currentPath); // Создаем da
 
       async function reactionOpenThemes(index) {
         console.log('pressedOpenThemes--');
+        buttonTopic.disabled = true;
         try {
           depth = 'themes';
           createPageBtn.disabled = false; 
@@ -460,6 +496,7 @@ fileListElement.dataLoader = createDataLoader(currentPath); // Создаем da
 
         async function reactionOpenDocument() {
           console.log('pressedSelectDocument--');
+          buttonTopic.disabled = false;
           if( depth === ''){
           depth = 'root';
           currentPath = currentPath + '/document';
@@ -581,7 +618,25 @@ fileListElement.dataLoader = createDataLoader(currentPath); // Создаем da
               return newPath;
             }
 
+ async function updateFileList(index) {
+     
+        console.log('updateFileList');
+        try {
 
+        
+          const newData = await openDocumentApi(currentPath);
+          newData.data.unshift({ name: '...................', type: 'folder-' });
+          fileListElement.data = newData.data;
+          depth = 'root';
+          
+        } catch (error) {
+          console.error('Ошибка при загрузке данных:', error);
+        }
+
+        console.log('нажата openBackThemes');
+        
+
+      }
 
 //-------------------------------------------------------------------------------
 

@@ -238,3 +238,35 @@ import { gethData } from './fetchData.js';
   };
   
   
+export const createTopicApi = async (path ,topicValue) => {
+    console.log('createTopicApi');
+    const url = `${API_BASE_URL}/create-topic`;
+
+    try {
+
+      const requestBody = {
+        path: path,
+        topicValue: topicValue
+      };
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestBody)
+     });
+      console.log(requestBody);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+  
+     const data = await response.json();
+      
+      return data;
+    } catch (error) {
+      console.error('Ошибка при обработки createPageApi', error);
+      throw error;
+    }
+  };
