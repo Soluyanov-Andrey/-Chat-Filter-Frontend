@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', function() {
   let lastClickedItem = null;  // Внешняя переменная для item
   let depth = ''; // Значение может быть трех типов пустое '','root','themes'
 
-  let currentPath = "/media/andrey/project/flash/linux/manul"; // Объявляем переменную
+  let currentPath = "/media/andrey/backap/flash"; // Объявляем переменную
   let savecurrentPath = currentPath;
 
 
@@ -623,8 +623,12 @@ fileListElement.dataLoader = createDataLoader(currentPath); // Создаем da
         console.log('updateFileList');
         try {
 
+          console.log('currentPath',currentPath);
         
           const newData = await openDocumentApi(currentPath);
+          
+          console.log('newData.data',newData.data);
+
           newData.data.unshift({ name: '...................', type: 'folder-' });
           fileListElement.data = newData.data;
           depth = 'root';
