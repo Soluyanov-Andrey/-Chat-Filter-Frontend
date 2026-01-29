@@ -91,6 +91,4 @@
 
 ## 📹 Демонстрация работы
 
-<video width="800" controls>
-  <source src="https://raw.githubusercontent.com/Soluyanov-Andrey/-Chat-Filter-Frontend/main/docs/demo.webm" type="video/webm">
-</video>
+https://youtu.be/wCJYFHj1sik
