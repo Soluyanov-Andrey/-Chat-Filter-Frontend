@@ -1,7 +1,7 @@
 import "./index.scss"
 import "./zeroing.scss"
 
-// Импортируем компаненты
+// Импортируем компоненты
 import { FileList } from './component/fileList.js'; 
 import { MessageModal } from './component/customModal.js'; 
 import { CheckboxList } from './component/checkboxList.js'; 
@@ -33,629 +33,509 @@ import makePanelResizable from './limiterMovement.js'
 document.addEventListener('DOMContentLoaded', function() {
 
   let lastClickedItem = null;  // Внешняя переменная для item
-  let depth = ''; // Значение может быть трех типов пустое '','root','themes'
+  let depth = ''; // Значение может быть трех типов: пустое ('', 'root', 'themes')
 
   let currentPath = "/media/andrey/backap/flash"; // Объявляем переменную
   let savecurrentPath = currentPath;
 
-
-  let index;  // Индекс элемента, на котором произошел двойной клик (например: 11).
-  let data;   // Массив данных, отображаемых в списке (например: [{name: ' sh скрипты', type: 'folder-'}, {name: '7zip', type: 'folder-'}, {name: 'UFW сетевой экран', type: 'folder-'}]).
-  let item;   // Объект данных, соответствующий элементу, на котором произошел двойной клик (например: {name: 'mysql', type: 'folder-'}).
+  let index;  // Индекс элемента, на котором произошел двойной клик
+  let data;   // Массив данных, отображаемых в списке
+  let item;   // Объект данных, соответствующий элементу, на котором произошел двойной клик
 
   const fileListElement = document.getElementById('my-file-list');
   const modal = document.getElementById('message-modal');
   const checkboxList = document.getElementById('checkbox-list');
 
-
-  // function deleteSelect1(){
-  //   console.log('jj');
-    
-  // }
-
-  // lookPageBtn.addEventListener("click", deleteSelect1);
-
-
-
-//-------------------------------------------------------------------------------
-// блоки кода событий на кнопках
-//-------------------------------------------------------------------------------
+  //-------------------------------------------------------------------------------
+  // Блоки кода событий на кнопках
+  //-------------------------------------------------------------------------------
 
   //------------------------------------------------------------------------------
+  const createPageBtn = document.getElementById('createPageBtn');
 
-   const createPageBtn = document.getElementById('createPageBtn');
-
-   async function createPageBtnFn(){
-   
-
+  async function createPageBtnFn() {
     const result = await createPageApi(currentPath, index);
 
-    
-
-    if (result.message === 'create-page')
+    if (result.message === 'create-page') {
       try {
-       updateFileList();
+        updateFileList();
       } catch (error) {
-        console.error("Ошибка при вызове getSelected в ", error);
+        console.error("Ошибка при вызове getSelected: ", error);
       }
       return;
-    
-      
-     
     }
+  }
 
-    createPageBtn.addEventListener("click",createPageBtnFn);
+  createPageBtn.addEventListener("click", createPageBtnFn);
   //------------------------------------------------------------------------------
 
-
-
   //-------------------------------------------------------------------------------
-    const lookPageBtn = document.getElementById('lookPageBtn');
-    
+  const lookPageBtn = document.getElementById('lookPageBtn');
+  const rightPanel = document.querySelector('.right-panel'); // Получаем ссылку на right-panel по классу
 
-    const rightPanel = document.querySelector('.right-panel'); // Получаем ссылку на right-panel по классу
+  let pageLoaderInstance = null; // Объявляем pageLoaderInstance в глобальной области видимости
 
+  async function lookSelected() {
+    let arraySelect = checkboxList.getSelectedIndices();
+    const result = await lookPageApi(arraySelect);
 
-    let pageLoaderInstance = null; // Объявляем pageLoaderInstance в глобальной области видимости
-
-    async function lookSelected(){
-      
-      let arraySelect = checkboxList.getSelectedIndices();
-      const result = await lookPageApi(arraySelect);
-    
-      if (result.message === 'Страница из выбранных элементов создана') {
-        try {
-          checkboxList.classList.toggle('hidden'); //Скрываем компанент classList меняя стиль 
-          lookPageBtn.disabled = true; //Скрываем кнопку Смотрим страницы добавляя атрибут  disabled к html <button id="lookPageBtn" disabled>
-          deleteSelectBtn.disabled = true;
-          laveSelectBtn.disabled = true;
-
-
-          backBtn.disabled = false; //Отображаем кнопку вернутся назад
-    
-          pageLoaderInstance = document.createElement('page-loader');
-          pageLoaderInstance.setAttribute('page-url', 'http://localhost:3000/LOOK.html'); 
-          rightPanel.appendChild(pageLoaderInstance); // Добавляем в right-panel
-        } catch (error) {
-          console.error("Ошибка при вызове getSelected в ", error);
-        }
-        return;
-      }
-    }
-    
-    lookPageBtn.addEventListener("click",lookSelected);
-  //-------------------------------------------------------------------------------
-
-
-  //-------------------------------------------------------------------------------
-    const deleteSelectBtn = document.getElementById('deleteSelectBtn');
-    async function deleteSelect(){
-
-      let arraySelect = checkboxList.getSelectedIndices();
-
-      const result = await deleteSelectApi(arraySelect);
-      
-      if (result.message === 'Элементы успешно удалены') {
-         lookPageBtn.disabled = true;
-         deleteSelectBtn.disabled = true;
-         laveSelectBtn.disabled = true;
-        (async () => {
-          try {
-            const result = await getSelected();
-            console.log("Результат getSelected:", result);
-            // ... Дальнейшая обработка результата ...
-          } catch (error) {
-            console.error("Ошибка при вызове getSelected:", error);
-            // Обработка ошибки
-          }
-        })();
-        modal.openModal(result.message);
-        return;
-      }
-    }
-    deleteSelectBtn.addEventListener("click", deleteSelect);
-  //-------------------------------------------------------------------------------
-
-
-  //-------------------------------------------------------------------------------
-    const laveSelectBtn = document.getElementById('leaveSelectBtn');
-    async function laveSelected(){
-
-      let arraySelect = checkboxList.getSelectedIndices();
-      
-      const result = await laveSelectApi(arraySelect);
-      if (result.message === 'Элементы успешно удалены') {
-
-          lookPageBtn.disabled = true; //Скрываем кнопку Смотрим страницы добавляя атрибут  disabled к html <button id="lookPageBtn" disabled>
-          deleteSelectBtn.disabled = true;
-          laveSelectBtn.disabled = true;
-        (async () => {
-          try {
-            const result = await getSelected();
-            
-            console.log("в laveSelected() Результат getSelected: ", result);
-            // ... Дальнейшая обработка результата ...
-          } catch (error) {
-            console.error("Ошибка при вызове getSelected в ", error);
-            // Обработка ошибки
-          }
-        })();
-        modal.openModal(result.message);
-        return;
-      }
-    }
-    laveSelectBtn.addEventListener("click", laveSelected);
-  //-------------------------------------------------------------------------------
-
-  //-------------------------------------------------------------------------------
-    const scanBtn = document.getElementById("scanBtn");
-
-    async function getSelected() {
-      const result = await getScanApi();
-
-      if (result && result.data) {
-
-        const receivedData = result.data;
-        const newDataString = JSON.stringify(receivedData);
-        checkboxList.setAttribute('data', newDataString);
-
-        console.log(receivedData); // Выведет массив receivedData
-        // Теперь можно работать с receivedData, например:
-        // receivedData.forEach(item => console.log(item)); // Выведет каждый элемент массива
-        // const firstItem = receivedData[0]; // Получить первый элемент
-        // console.log(firstItem);
-      } else {
-        console.log("Ошибка: receivedData не найдено или result равно null/undefined.");
-      }
-      
-    }
-
-    scanBtn.addEventListener("click", getSelected);
-  //-------------------------------------------------------------------------------
-
-  //-------------------------------------------------------------------------------
-    const backBtn = document.getElementById("backBtn");
-
-    function functionhanbackBtn() {
-
-      pageLoaderInstance.remove(); //Удаляем компанент pageLoaderInstance
-      checkboxList.classList.toggle('hidden', false);//Показываем classList меняя стиль
-      lookPageBtn.disabled = false; //Показываем кнопку Смотрим страницы убирая атрибут  disabled к html <button id="lookPageBtn">
-      deleteSelectBtn.disabled = false;
-      laveSelectBtn.disabled = false;
-
-      backBtn.disabled = true; //Отображаем кнопку вернутся назад
-      
-    }
-
-    backBtn.addEventListener("click", functionhanbackBtn);
-  //-------------------------------------------------------------------------------
-
-
-  //-------------------------------------------------------------------------------
-    const buttonTopic = document.getElementById("addTopicBtn");
-    const dialog = document.getElementById('myDialog');
-
-    buttonTopic.disabled = true;
-
-
-    
-
-    // Добавляем слушатель на кнопку, которая открывает диалог
-    buttonTopic.addEventListener('click', () => {
-    dialog.show(); // Вызываем метод show() нашего компонента
-    });
-
-      // Слушаем кастомное событие 'dialog-submit', которое отправляет компонент
-    dialog.addEventListener('dialog-submit', async (event) => {
+    if (result.message === 'Страница из выбранных элементов создана') {
       try {
-          const submittedValue = event.detail.value;
-          console.log('Получено отправленное значение:', submittedValue);
-          
-          const data = await createTopicApi(currentPath, submittedValue);
-          
-          // Обработка полученных данных
-          console.log('Данные получены:', data);
-          
-          // Дальнейшая логика обработки data
-          if (data.message) {
-              // Действия при успешном выполнении
-              console.log('Данные получены1:', data);
-              updateFileList();
-          } else {
-              // Обработка ошибок
-              showError(data.message);
-          }
+        checkboxList.classList.toggle('hidden'); // Скрываем компонент, меняя стиль 
+        lookPageBtn.disabled = true; // Скрываем кнопку "Смотрим страницы", добавляя атрибут disabled
+        deleteSelectBtn.disabled = true;
+        laveSelectBtn.disabled = true;
+
+        backBtn.disabled = false; // Отображаем кнопку "Вернуться назад"
+
+        pageLoaderInstance = document.createElement('page-loader');
+        pageLoaderInstance.setAttribute('page-url', 'http://localhost:3000/LOOK.html'); 
+        rightPanel.appendChild(pageLoaderInstance); // Добавляем в right-panel
       } catch (error) {
-          console.error('Ошибка при выполнении запроса:', error);
-          showError('Произошла ошибка при создании темы');
+        console.error("Ошибка при вызове getSelected: ", error);
       }
-});
+      return;
+    }
+  }
 
+  lookPageBtn.addEventListener("click", lookSelected);
   //-------------------------------------------------------------------------------
 
- 
-
   //-------------------------------------------------------------------------------
-    const addFolderBtn = document.getElementById("addFolderBtn");
+  const deleteSelectBtn = document.getElementById('deleteSelectBtn');
+  
+  async function deleteSelect() {
+    let arraySelect = checkboxList.getSelectedIndices();
+    const result = await deleteSelectApi(arraySelect);
 
-    async function handleAddFolderButtonClick() {
-
-      if (lastClickedItem?.type === 'folder+') {
-        
-        modal.openModal("В папке уже есть папка document");
-        return;
-      }
-
-      if (lastClickedItem){
-      let path = currentPath+'/'+lastClickedItem.name;
-        await createFolderApi(path);
-        modal.openModal("Папка создана");
-        // Загружаем данные
+    if (result.message === 'Элементы успешно удалены') {
+      lookPageBtn.disabled = true;
+      deleteSelectBtn.disabled = true;
+      laveSelectBtn.disabled = true;
+      
+      (async () => {
         try {
-          const newData = await FolderStructureService.getFolderStructure(currentPath);  // Используем currentPath
-          fileListElement.data = newData;   
+          const result = await getSelected();
+          console.log("Результат getSelected:", result);
         } catch (error) {
-          console.error('Ошибка при загрузке данных:', error);
-        }   
+          console.error("Ошибка при вызове getSelected:", error);
+        }
+      })();
+      
+      modal.openModal(result.message);
+      return;
+    }
+  }
+  
+  deleteSelectBtn.addEventListener("click", deleteSelect);
+  //-------------------------------------------------------------------------------
 
+  //-------------------------------------------------------------------------------
+  const laveSelectBtn = document.getElementById('leaveSelectBtn');
+  
+  async function laveSelected() {
+    let arraySelect = checkboxList.getSelectedIndices();
+    const result = await laveSelectApi(arraySelect);
+    
+    if (result.message === 'Элементы успешно удалены') {
+      lookPageBtn.disabled = true;
+      deleteSelectBtn.disabled = true;
+      laveSelectBtn.disabled = true;
+      
+      (async () => {
+        try {
+          const result = await getSelected();
+          console.log("В laveSelected() Результат getSelected: ", result);
+        } catch (error) {
+          console.error("Ошибка при вызове getSelected: ", error);
+        }
+      })();
+      
+      modal.openModal(result.message);
+      return;
+    }
+  }
+  
+  laveSelectBtn.addEventListener("click", laveSelected);
+  //-------------------------------------------------------------------------------
+
+  //-------------------------------------------------------------------------------
+  const scanBtn = document.getElementById("scanBtn");
+
+  async function getSelected() {
+    const result = await getScanApi();
+
+    if (result && result.data) {
+      const receivedData = result.data;
+      const newDataString = JSON.stringify(receivedData);
+      checkboxList.setAttribute('data', newDataString);
+
+      console.log(receivedData);
+    } else {
+      console.log("Ошибка: receivedData не найдено или result равно null/undefined.");
+    }
+  }
+
+  scanBtn.addEventListener("click", getSelected);
+  //-------------------------------------------------------------------------------
+
+  //-------------------------------------------------------------------------------
+  const backBtn = document.getElementById("backBtn");
+
+  function handleBackBtn() {
+    if (pageLoaderInstance) {
+      pageLoaderInstance.remove(); // Удаляем компонент pageLoaderInstance
+    }
+    
+    checkboxList.classList.toggle('hidden', false); // Показываем компонент, меняя стиль
+    lookPageBtn.disabled = false; // Показываем кнопку "Смотрим страницы", убирая атрибут disabled
+    deleteSelectBtn.disabled = false;
+    laveSelectBtn.disabled = false;
+
+    backBtn.disabled = true; // Скрываем кнопку "Вернуться назад"
+  }
+
+  backBtn.addEventListener("click", handleBackBtn);
+  //-------------------------------------------------------------------------------
+
+  //-------------------------------------------------------------------------------
+  const buttonTopic = document.getElementById("addTopicBtn");
+  const dialog = document.getElementById('myDialog');
+
+  buttonTopic.disabled = true;
+
+  // Добавляем слушатель на кнопку, которая открывает диалог
+  buttonTopic.addEventListener('click', () => {
+    dialog.show(); // Вызываем метод show() нашего компонента
+  });
+
+  // Слушаем кастомное событие 'dialog-submit', которое отправляет компонент
+  dialog.addEventListener('dialog-submit', async (event) => {
+    try {
+      const submittedValue = event.detail.value;
+      console.log('Получено отправленное значение:', submittedValue);
+
+      const data = await createTopicApi(currentPath, submittedValue);
+
+      // Обработка полученных данных
+      console.log('Данные получены:', data);
+
+      // Дальнейшая логика обработки data
+      if (data.message) {
+        console.log('Данные получены1:', data);
+        updateFileList();
+      } else {
+        // Обработка ошибок
+        showError(data.message);
       }
+    } catch (error) {
+      console.error('Ошибка при выполнении запроса:', error);
+      showError('Произошла ошибка при создании темы');
+    }
+  });
+  //-------------------------------------------------------------------------------
+
+  //-------------------------------------------------------------------------------
+  const addFolderBtn = document.getElementById("addFolderBtn");
+
+  async function handleAddFolderButtonClick() {
+    if (lastClickedItem?.type === 'folder+') {
+      modal.openModal("В папке уже есть папка document");
+      return;
     }
 
-    addFolderBtn.addEventListener("click", handleAddFolderButtonClick);
+    if (lastClickedItem) {
+      let path = currentPath + '/' + lastClickedItem.name;
+      await createFolderApi(path);
+      modal.openModal("Папка создана");
+      
+      // Загружаем данные
+      try {
+        const newData = await FolderStructureService.getFolderStructure(currentPath);
+        fileListElement.data = newData;
+      } catch (error) {
+        console.error('Ошибка при загрузке данных:', error);
+      }
+    }
+  }
+
+  addFolderBtn.addEventListener("click", handleAddFolderButtonClick);
   //-------------------------------------------------------------------------------
 
-
-
-
-
-//-------------------------------------------------------------------------------
-// Блок вызова fileListElement.dataLoader
-//-------------------------------------------------------------------------------
+  //-------------------------------------------------------------------------------
+  // Блок вызова fileListElement.dataLoader
+  //-------------------------------------------------------------------------------
 
   const createDataLoader = (path) => {
     return async () => {
-      updateTextInput(path,"#input");
+      updateTextInput(path, "#input");
       return await FolderStructureService.getFolderStructure(path);
     };
   };
 
-// Инициализация dataLoader (с начальным путем)
-fileListElement.dataLoader = createDataLoader(currentPath); // Создаем dataLoader
-//-------------------------------------------------------------------------------
-
-
-
-
-//-------------------------------------------------------------------------------
-// Обработка обработчиков из зарегестрированных в компанентах
-//-------------------------------------------------------------------------------
-
-
-  //checkboxList событие selected-changed
+  // Инициализация dataLoader (с начальным путем)
+  fileListElement.dataLoader = createDataLoader(currentPath);
   //-------------------------------------------------------------------------------
-    checkboxList.addEventListener('selected-changed', (event) => {
-      
-      const shouldDisable = Array.isArray(event.detail) 
+
+  //-------------------------------------------------------------------------------
+  // Обработка обработчиков из зарегистрированных в компонентах
+  //-------------------------------------------------------------------------------
+
+  // checkboxList событие selected-changed
+  //-------------------------------------------------------------------------------
+  checkboxList.addEventListener('selected-changed', (event) => {
+    const shouldDisable = Array.isArray(event.detail) 
       ? event.detail.length === 0
-      : true; // отключаем, если это не массив
+      : true; // Отключаем, если это не массив
 
-      lookPageBtn.disabled = shouldDisable;
-      deleteSelectBtn.disabled = shouldDisable;
-      laveSelectBtn.disabled = shouldDisable;
+    lookPageBtn.disabled = shouldDisable;
+    deleteSelectBtn.disabled = shouldDisable;
+    laveSelectBtn.disabled = shouldDisable;
 
-      const selectedIndices = event.detail; // Теперь detail — это сам массив
-      console.log('Выбранные индексы:', selectedIndices);
-    });
+    const selectedIndices = event.detail; // Теперь detail — это сам массив
+    console.log('Выбранные индексы:', selectedIndices);
+  });
   //-------------------------------------------------------------------------------
 
-
-  //fileListElement событие item-click
+  // fileListElement событие item-click
   //-------------------------------------------------------------------------------
-    document.addEventListener('item-click', (event) => {
-      const index = event.detail.index; // Получаем индекс из detail
-      const data = fileListElement.data; // Получаем данные из компонента
-      const item = data[index]; // Получаем элемент данных по индексу
+  document.addEventListener('item-click', (event) => {
+    const index = event.detail.index; // Получаем индекс из detail
+    const data = fileListElement.data; // Получаем данные из компонента
+    const item = data[index]; // Получаем элемент данных по индексу
 
-      lastClickedItem = item; // Записываем во внешнюю переменную
-      console.log('Кликнули на элемент:', index);
-    
-    });
+    lastClickedItem = item; // Записываем во внешнюю переменную
+    console.log('Кликнули на элемент:', index);
+  });
   //-------------------------------------------------------------------------------
 
-
-
-
-
-  //fileListElement событие item-double-click 
-  /**-------------------------------------------------------------------------------
+  // fileListElement событие item-double-click 
+  /**
    * Обработчик события двойного клика на элементе списка.
    * Определяет тип элемента (папка, "назад" или другой) и выполняет соответствующее действие.
    * @param {Event} event - Объект события двойного клика. Содержит информацию о событии,
    *                        включая индекс элемента, на котором произошел клик.
    */
   document.addEventListener('item-double-click', async (event) => {
-     index = event.detail.index; // Индекс элемента, на котором произошел двойной клик (например: 11).
-     data = fileListElement.data; // Массив данных, отображаемых в списке (например: [{name: ' sh скрипты', type: 'folder-'}, {name: '7zip', type: 'folder-'}, {name: 'UFW сетевой экран', type: 'folder-'}]).
-     item = data[index]; // Объект данных, соответствующий элементу, на котором произошел двойной клик (например: {name: 'mysql', type: 'folder-'}).
+    index = event.detail.index; // Индекс элемента, на котором произошел двойной клик
+    data = fileListElement.data; // Массив данных, отображаемых в списке
+    item = data[index]; // Объект данных, соответствующий элементу
 
     if (!item) {
       console.warn("Двойной клик на несуществующем элементе.");
-      return; // Прерываем выполнение, если item не существует.
+      return; // Прерываем выполнение, если item не существует
     }
-      console.log('index',index);
-      console.log('data',data);
-      console.log('item',item);
+
+    console.log('index', index);
+    console.log('data', data);
+    console.log('item', item);
+
     switch (true) {
-
-      case presseBackThemes(item):
-        
-        
-
+      case isPressBackThemes(item):
         reactionBackThemes();
         break;
 
-      case pressedOpenThemes(item):
-        
-        getSelected();
+      case isPressedOpenThemes(item):
+        await getSelected();
         reactionOpenThemes(index);
         break;
 
-      // case isSelectRootBack(item):
-      //   handleBackButtonClick();  // Выполняем переход назад, если смотрели папку document файл root
-      //   break;
-
-      case pressedSelectDocument(item):
-      
-        reactionOpenDocument(); // Выполняем чтение document файл root
-        break;
-      
-      case pressedBackNavigationItem(item):
-          
-
-        reactionBackNavigation(); // Выполняем переход назад, если это элемент навигации "назад".
+      case isPressedSelectDocument(item):
+        reactionOpenDocument();
         break;
 
-      case  pressedFolder(item):
-        await reactionFolderDoubleClick(item); // Обрабатываем двойной клик на папке.
+      case isPressedBackNavigationItem(item):
+        reactionBackNavigation();
+        break;
+
+      case isPressedFolder(item):
+        await reactionFolderDoubleClick(item);
         break;
 
       default:
         console.log("Двойной клик на элементе, который не является ни папкой, ни кнопкой 'назад'. Ничего не делаем.");
-        // Ничего не делаем, если это не папка и не кнопка "назад"
         break;
     }
   });
 
-  
-    function presseBackThemes(item) {
-      return depth === 'themes' && item.name === '...................';
+  function isPressBackThemes(item) {
+    return depth === 'themes' && item.name === '...................';
+  }
+
+  async function reactionBackThemes() {
+    buttonTopic.disabled = false;
+    createPageBtn.disabled = true;
+    console.log('pressBackThemes(--');
+    
+    try {
+      const newData = await openDocumentApi(currentPath);
+      newData.data.unshift({ name: '...................', type: 'folder-' });
+      fileListElement.data = newData.data;
+      depth = 'root';
+    } catch (error) {
+      console.error('Ошибка при загрузке данных:', error);
     }
 
-      // function removeLastPathPart(path) {
-      //   // Удаляем слэш в конце пути, если он есть
-      //   path = path.endsWith('/') ? path.slice(0, -1) : path;
-      //   // Разделяем путь по слэшам и убираем последнюю часть
-      //   const parts = path.split('/');
-      //   parts.pop();
-      //   // Собираем путь обратно
-      //   return parts.join('/');
-      // }
+    console.log('нажата openBackThemes');
+  }
 
-      async function reactionBackThemes(index) {
-        buttonTopic.disabled = false;
-        createPageBtn.disabled = true;
-        console.log('presseBackThemes(--');
-        try {
+  function isPressedOpenThemes(item) {
+    return depth === 'root' && item.name !== '...................';
+  }
 
-          // let currentPathTemp = removeLastPathPart(currentPath);
-          // console.log('currentPath--',currentPath);
-          const newData = await openDocumentApi(currentPath);
-          newData.data.unshift({ name: '...................', type: 'folder-' });
-          fileListElement.data = newData.data;
-          depth = 'root';
-          
-        } catch (error) {
-          console.error('Ошибка при загрузке данных:', error);
-        }
+  async function reactionOpenThemes(index) {
+    console.log('pressedOpenThemes--');
+    buttonTopic.disabled = true;
+    
+    try {
+      depth = 'themes';
+      createPageBtn.disabled = false;
+      const newData = await openThemesApi(currentPath, index);
+      newData.data.unshift({ name: '...................', type: 'folder-' });
+      fileListElement.data = newData.data;
+    } catch (error) {
+      console.error('Ошибка при загрузке данных:', error);
+    }
+  }
 
-        console.log('нажата openBackThemes');
-        
+  function isPressedSelectDocument(item) {
+    return item && item.name === 'document';
+  }
 
+  async function reactionOpenDocument() {
+    console.log('pressedSelectDocument--');
+    buttonTopic.disabled = false;
+    
+    if (depth === '') {
+      depth = 'root';
+      currentPath = currentPath + '/document';
+      
+      try {
+        const newData = await openDocumentApi(currentPath);
+        newData.data.unshift({ name: '...................', type: 'folder-' });
+        fileListElement.data = newData.data;
+        updateTextInput(currentPath, "#input");
+      } catch (error) {
+        console.error('Ошибка при загрузке данных:', error);
       }
-    
-    
-    
-    function pressedOpenThemes(item) {
-      return depth === 'root' && item.name != '...................';
     }
+  }
 
-      async function reactionOpenThemes(index) {
-        console.log('pressedOpenThemes--');
-        buttonTopic.disabled = true;
-        try {
-          depth = 'themes';
-          createPageBtn.disabled = false; 
-          const newData = await openThemesApi(currentPath, index);
-          newData.data.unshift({ name: '...................', type: 'folder-' });
-          fileListElement.data = newData.data;
-        } catch (error) {
-          console.error('Ошибка при загрузке данных:', error);
-        }
+  /**
+   * Проверяет, является ли элемент элементом навигации "назад" ("...................").
+   * @param {object} item - Объект, представляющий элемент списка.
+   * @returns {boolean} - true, если это элемент "назад", иначе false.
+   */
+  function isPressedBackNavigationItem(item) {
+    return item && item.name === '...................';
+  }
 
+  /**
+   * Обрабатывает нажатие кнопки "назад", осуществляя переход к предыдущей директории.
+   * @async
+   */
+  async function reactionBackNavigation() {
+    buttonTopic.disabled = true;
+    console.log('pressedBackNavigationItem--');
+    depth = '';
+    
+    let newPath = removeLastDirectoryFromPath(currentPath);
+    updateTextInput(newPath, "#input");
+    
+    // Загружаем данные
+    try {
+      const newData = await FolderStructureService.getFolderStructure(newPath);
+      
+      if (newPath !== savecurrentPath) {
+        newData.unshift({ name: '...................', type: 'folder-' });
       }
-
-    function isSelectRootBack(item) {
-      return depth === 'root' && item.name === '...................';
+      
+      fileListElement.data = newData;
+      currentPath = newPath;
+      lastClickedItem = null;
+    } catch (error) {
+      console.error('Ошибка при загрузке данных:', error);
     }
-     
+  }
 
-    function pressedSelectDocument(item) {
-      return item && item.name === 'document';
+  /**
+   * Проверяет, является ли элемент папкой.
+   * @param {object} item - Объект, представляющий элемент списка.
+   * @returns {boolean} - true, если это папка, иначе false.
+   */
+  function isPressedFolder(item) {
+    const isActuallyAFolder = item.type && item.type.startsWith('folder') && item.name;
+    console.log(!!isActuallyAFolder);
+    return !!isActuallyAFolder;
+  }
+
+  /**
+   * Обрабатывает двойной клик на папке.
+   * @param {object} item - Объект, представляющий папку.
+   */
+  async function reactionFolderDoubleClick(item) {
+    console.log('pressedFolder--');
+    const folderName = item.name;
+    const newPath = constructNewPath(currentPath, folderName);
+
+    currentPath = newPath; // Обновляем текущий путь
+    updateTextInput(newPath, "#input");
+    fileListElement.dataLoader = createDataLoader(currentPath);
+
+    try {
+      const newData = await FolderStructureService.getFolderStructure(currentPath);
+      newData.unshift({ name: '...................', type: 'folder-' });
+      fileListElement.data = newData;
+      lastClickedItem = null;
+    } catch (error) {
+      console.error('Ошибка при загрузке данных:', error);
     }
+  }
 
-        async function reactionOpenDocument() {
-          console.log('pressedSelectDocument--');
-          buttonTopic.disabled = false;
-          if( depth === ''){
-          depth = 'root';
-          currentPath = currentPath + '/document';
-          try {
-            const newData = await openDocumentApi(currentPath);
-            newData.data.unshift({ name: '...................', type: 'folder-' });
-            fileListElement.data = newData.data;
-            
-            updateTextInput(currentPath, "#input");
+  /**
+   * Конструирует новый путь на основе текущего пути и имени папки.
+   * @param {string} currentPath - Текущий путь.
+   * @param {string} folderName - Имя папки.
+   * @returns {string} - Новый путь.
+   */
+  function constructNewPath(currentPath, folderName) {
+    let newPath = currentPath;
+    if (!currentPath.endsWith('/')) {
+      newPath += '/';
+    }
+    newPath += folderName;
+    return newPath;
+  }
 
-          } catch (error) {
-            console.error('Ошибка при загрузке данных:', error);
-          }
-
-          }
-         
-        }
-
+  async function updateFileList() {
+    console.log('updateFileList');
     
-    /**
-     * Проверяет, является ли элемент элементом навигации "назад" ("...........").
-     * @param {object} item - Объект, представляющий элемент списка.
-     * @returns {boolean} - True, если это элемент "назад", иначе false.
-     */
-    function pressedBackNavigationItem(item) {
-      return item && item.name === '...................';
+    try {
+      console.log('currentPath', currentPath);
+      const newData = await openDocumentApi(currentPath);
+      console.log('newData.data', newData.data);
+
+      newData.data.unshift({ name: '...................', type: 'folder-' });
+      fileListElement.data = newData.data;
+      depth = 'root';
+    } catch (error) {
+      console.error('Ошибка при загрузке данных:', error);
     }
 
-        /**
-         * Обрабатывает нажатие кнопки "назад", осуществляя переход к предыдущей директории.
-         *
-         * Функция выполняет следующие действия:
-         * 1.  Удаляет последнюю директорию из текущего пути (`currentPath`).
-         * 2.  Обновляет текстовое поле в UI (`#input`) новым путем.
-         * 3.  Загружает структуру папок для нового пути с помощью `FolderStructureService`.
-         * 4.  Добавляет элемент "назад" ("...................") в начало списка, если новый путь не совпадает с путем сохранения (`savecurrentPath`).
-         * 5.  Обновляет данные в UI-элементе `fileListElement`, отображающем структуру папок.
-         * 6.  Обновляет `currentPath` новым путем.
-         * 7.  Сбрасывает `lastClickedItem` в `null`.
-         *
-         * @async
-         * @function handleBackButtonClick
-         * @throws {Error} Если происходит ошибка при загрузке структуры папок.
-         */
-          async function reactionBackNavigation(){
-            buttonTopic.disabled = true;
-            console.log('pressedBackNavigationItem--');
-            depth = '';
-            let newPath = removeLastDirectoryFromPath(currentPath);
-            updateTextInput(newPath,"#input");
-              // Загружаем данные
-              try {
-                const newData = await FolderStructureService.getFolderStructure(newPath);  // Используем currentPath
-                if( newPath != savecurrentPath) {
-                newData.unshift({ name: '...................', type: 'folder-' });
-                
-                //тут происходит вставка в элемент fileListElement
-              }
-               
-                fileListElement.data = newData;
-                currentPath =  newPath;
-                lastClickedItem = null;
-                  
-              } catch (error) {
-                console.error('Ошибка при загрузке данных:', error);
-              }
-          
-          }
+    console.log('вызвана openBackThemes');
+  }
 
-
-    /**
-     * Проверяет, является ли элемент папкой.
-     * @param {object} item - Объект, представляющий элемент списка.
-     * @returns {boolean} - True, если это папка, иначе false.
-     */
-    function  pressedFolder(item) {
-      const isActuallyAFolder = item.type && item.type.startsWith('folder') && item.name;
-      console.log(!!isActuallyAFolder);
-      return !!isActuallyAFolder;
-    }
-    
-        /**
-         * Обрабатывает двойной клик на папке.
-         * @param {object} item - Объект, представляющий папку.
-         */
-        async function reactionFolderDoubleClick(item) {
-          console.log('pressedFolder--');
-          const folderName = item.name;
-          const newPath = constructNewPath(currentPath, folderName);
-        
-          currentPath = newPath; // Обновляем текущий путь
-          updateTextInput(newPath, "#input");
-          fileListElement.dataLoader = createDataLoader(currentPath);
-        
-          try {
-            const newData = await FolderStructureService.getFolderStructure(currentPath);
-            newData.unshift({ name: '...................', type: 'folder-' });
-            fileListElement.data = newData;
-
-            
-            lastClickedItem = null;
-          } catch (error) {
-            console.error('Ошибка при загрузке данных:', error);
-          }
-        }
-    
-            /**
-             * Конструирует новый путь на основе текущего пути и имени папки.
-             * @param {string} currentPath - Текущий путь.
-             * @param {string} folderName - Имя папки.
-             * @returns {string} - Новый путь.
-             */
-            function constructNewPath(currentPath, folderName) {
-              let newPath = currentPath;
-              if (!currentPath.endsWith('/')) {
-                newPath += '/';
-              }
-              newPath += folderName;
-              return newPath;
-            }
-
- async function updateFileList(index) {
-     
-        console.log('updateFileList');
-        try {
-
-          console.log('currentPath',currentPath);
-        
-          const newData = await openDocumentApi(currentPath);
-          
-          console.log('newData.data',newData.data);
-
-          newData.data.unshift({ name: '...................', type: 'folder-' });
-          fileListElement.data = newData.data;
-          depth = 'root';
-          
-        } catch (error) {
-          console.error('Ошибка при загрузке данных:', error);
-        }
-
-        console.log('нажата openBackThemes');
-        
-
-      }
-
-//-------------------------------------------------------------------------------
-
-
-
-//-------------------------------------------------------------------------------
-// Загружаем код для перетаскивания разделительной линии
-//-------------------------------------------------------------------------------
-
-
+  //-------------------------------------------------------------------------------
+  // Загружаем код для перетаскивания разделительной линии
+  //-------------------------------------------------------------------------------
   makePanelResizable('.resize-handle', '.left-panel', '.container');
 
-});
-
-//-------------------------------------------------------------------------------
+  // Вспомогательная функция для отображения ошибок (добавлена, так как используется в коде)
+  function showError(message) {
+    console.error('Ошибка:', message);
+    // Здесь можно добавить логику отображения ошибки пользователю
+  }
+});-
 
 
 
