@@ -92,6 +92,5 @@
 ## 📹 Демонстрация работы
 
 <video width="800" controls>
-  <source src="./docs/demo.webm" type="video/webm">
-  Ваш браузер не поддерживает видео. [Скачать демо](./docs/demo.webm)
+  <source src="https://raw.githubusercontent.com/Soluyanov-Andrey/-Chat-Filter-Frontend/main/docs/demo.webm" type="video/webm">
 </video>
